@@ -1,12 +1,12 @@
 
 html,body,ul,li,h1,h2,h3,h4,p{margin:0; padding:0;}
-body{background-color:#8F9100;}
+body{background-color:#326a8a;}
 .wrapper{width:100%;}
 #canvas{
     display:block;
     margin:0 auto;
-    background-color:#3D3E00;
     margin-top:50px;
+    background-color:#82bb65;
   }
 .shadow{
   -webkit-box-shadow: -4px 9px 47px -10px rgba(0,0,0,0.75);
