@@ -1,5 +1,5 @@
 
-This project is made by Jacob Davison for COSC 231: Internet Based Computing at Eastern Michinan University
+This project is made by Jacob Davison for COSC 231: Internet Based Computing at Eastern Michigan University
 
 ------------------------
 
@@ -17,4 +17,4 @@ fire emblem, etc.
 
 click around the map to move your character, collect various object, craft
 the tools necessary to persuade the characters from your past to join your team, and defend
-you from the evils that come during the day.S
+you from the evils that come during the day

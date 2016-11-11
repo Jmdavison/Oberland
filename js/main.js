@@ -1,14 +1,21 @@
-//Main JS file
+//One big JS file
 
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 16;
-const MAPROWS = 16;
+const MAPCOLS = 30;
+const MAPROWS = 144;
 const NUMLAYERS = 2;
 const TILESIZE = 32;
 
-const TREE = 2;
+
+//interactive objects
 const HOUSE = 6;
+
+//enemies
+const FRIEZA = 101;
+
+//background objects
+const TREE = 2;
 const BURNT_TREE = 5;
 const STREET = 3;
 const CONCRETE = 4;
@@ -20,7 +27,6 @@ const GRASS = 1;
 var Loader = {
     images: {}
 };
-
 //this asset load loads images the async Promise function and stores them
 //in the images object.
 Loader.loadImage = function (key, src) {
@@ -49,24 +55,29 @@ Loader.getImage = function (key) {
 /* mouse input handling */
 
 var Mouse = {};
+Mouse.click = {
+  x: -1,
+  y: -1,
+  arrived: false,
+}
 
-Mouse.click = {};
-
-Mouse.up = function (e) {
+//click handler
+Mouse.handleClick = function (e) {
+  Mouse.click.arrived = false;
+  Game.hero.walking = true;
   var event =  window.event || e;
-  var y = event.offsetY;
-  var x = event.offsetX;
+  var destX = event.offsetX + Game.camera.x;
+  var destY = event.offsetY + Game.camera.y;
 
-  Mouse.click = {
-    x: x,
-    y: y,
-    used:false
+  Mouse.click.x = destX;
+  Mouse.click.y = destY;
   }
 
-  }
-
-  Mouse.isClick = function (){
-    return !this.click.used;
+Mouse.currentDest = function (){
+//    console.log(this.click.arrived);
+    if(this.click.arrived == false && this.click.x !== -1){
+      return true;
+    }else return false;
   }
 
 /*
@@ -89,7 +100,7 @@ var Game = {};
 Game.run = function (context) {
     this.ctx = context;
     this.elapsed = 0;
-
+    this.gameTime = 0;
     var promises = this.load();
     //this promise.all call waits for all promises
     //within function call to be resolved, then resolves
@@ -133,17 +144,32 @@ var generateMap = function (rows, cols, numLayers) {
         switch(i){
           //generate first layer
           case 0:
-            if( j == 0 || (j == rows - 1) ||  k == 0 ||  (k == cols - 1)){
+          //make sure we have trees around the border, besides where we have streets
+            if(j >= rows - 8  && j <= rows -7) {layers[i][j*cols + k] = STREET;}
+              //create the driveway
+            else if(j >= rows - 6  &&  k == cols/2  ) {layers[i][j*cols + k] = CONCRETE;}
+              //create grass
+              else if(Math.random() * 1000 < 5){
+                layers[i][j*cols + k] = 101;
+              } else {layers[i][j*cols + k] = GRASS;}
+            break;
+          //generate second layer
+          case 1:
+          if(( j == 0 || (j == rows - 1) ||  k == 0 ||  (k == cols - 1)) &&
+              (!(j >= rows - 8  && j <= rows -7) && !(k >= cols / 2 - 1 && k <= cols/2))){
+            //randomly place burnt trees
+            if(Math.random() * 10 <= 3){layers[i][j * cols + k] = BURNT_TREE;}
+            else layers[i][j * cols  + k] = TREE;
+            //create the street
+          }else if((j == rows - 2) && (k == cols / 2  )){
+              //create house
+              layers[i][j*cols + k] = HOUSE;
+            }else if(Math.random() * 100 < 3 && layers[i-1][j * cols + k] == GRASS){
               if(Math.random() * 10 <= 3){layers[i][j * cols + k] = BURNT_TREE;}
               else layers[i][j * cols  + k] = TREE;
-            }else if(j >= rows - 8  && j <= rows -7) {layers[i][j*cols + k] = STREET;}
-            else if(j >= rows - 6  &&  k == cols/2  ) {layers[i][j*cols + k] = CONCRETE;}
-            else {layers[i][j*cols + k] = GRASS;}
-            break;
-          case 1:
-            if((j == rows - 3 ) && (k == cols / 2 - 1  )){
-              layers[i][j*cols + k] = HOUSE;
-            }else {layers[i][j*cols + k] = 0;}
+            }else{
+              layers[i][j*cols + k] = 0;
+            }
           break;
             default: break;
         }
@@ -176,22 +202,12 @@ var map = {
   rows : MAPROWS,
   tSize : TILESIZE,
   numLayers : NUMLAYERS,
+  tiles: [],
 
   layers: generateMap(MAPROWS,MAPCOLS,NUMLAYERS),
 
   getTile: function(layer, col, row) {
       return this.layers[layer][col * this.cols + row];
-  },
-
-  isUnclickable: function(x,y){
-      var col = Math.floor(x / this.tSize);
-      var row = Math.floor(y / this.tSize);
-
-      for(var i=0; i<this.layers.length;i++){
-        var tile = this.getTile(i, col, row);
-        var unclickable = tile === TREE || tile === HOUSE || tile === BURNT_TREE;
-        return unclickable;
-      }
   },
   getCol: function (x) {
     return Math.floor(x / this.tSize);
@@ -204,6 +220,28 @@ var map = {
   },
   getY: function (row) {
     return row * this.tSize;
+  },
+  isInteraction: function(x,y){
+    //takes x,y coordinates from the mouse function and checks if the tile is clickable
+      var col = this.getCol(y);
+      var row = this.getRow(x);
+      this.tiles = [];
+
+      for(var i=0; i<this.layers.length;i++){
+        if(
+            this.getTile(i, col - 1, row) > 5 ||
+            this.getTile(i, col + 1, row) > 5 ||
+            this.getTile(i, col, row + 1) > 5 ||
+            this.getTile(i, col, row - 1) > 5 ||
+            this.getTile(i, col + 1, row - 1) > 5 ||
+            this.getTile(i, col + 1, row + 1) > 5 ||
+            this.getTile(i, col - 1, row - 1) > 5 ||
+            this.getTile(i, col - 1, row + 1) > 5
+          ){
+          this.tiles[i] = this.getTile(i, col, row);
+          return true;
+        }
+    }
   }
 }
 
@@ -261,6 +299,18 @@ Camera.prototype.update = function () {
   }
 };
 
+//Friend Constructor
+function Friend(map, x, y){
+  this.map = map;
+  this.x = x;
+  this.y = y;
+  this.width = map.tSize;
+  this.height = map.tSize;
+
+  this.image = Loader.getImage('hero');
+
+}
+
 //Hero Constructor
 function Hero(map, x, y) {
     this.map = map;
@@ -269,50 +319,58 @@ function Hero(map, x, y) {
     this.width = map.tSize;
     this.height = map.tSize;
 
+    this.velX = 0;
+    this.velY = 0;
     this.image = Loader.getImage('hero');
+    this.imageFlip = Loader.getImage('hero-flip');
 }
 
-Hero.SPEED = 256; // pixels per second
+Hero.SPEED = 250; // pixels per second
 
-Hero.prototype.move = function (delta, dirx, diry) {
+Hero.prototype.move = function (delta, destX, destY) {
     // move hero
-    this.x += dirx * Hero.SPEED * delta;
-    this.y += diry * Hero.SPEED * delta;
+    //console.log(this.x);
+    var tx = destX - this.x;
+    var ty = destY - this.y;
+    var dist = Math.sqrt((tx * tx) + (ty * ty));
+    //console.log(dist);
+    if(dist >= 5){
+      Mouse.click.arrived = false;
+      Game.hero.walking = true;
+      this.velX = (tx / dist) * Hero.SPEED * delta;
+      this.velY = (ty / dist) * Hero.SPEED * delta;
+    //console.log(this.velY + " " + this.velX);
+        this.x += this.velX;
+        this.y += this.velY;
 
-
-    // clamp values
-    var maxX = this.map.cols * this.map.tSize;
-    var maxY = this.map.rows * this.map.tSize;
-    this.x = Math.max(0, Math.min(this.x, maxX));
-    this.y = Math.max(0, Math.min(this.y, maxY));
+      // clamp values
+      var maxX = this.map.cols * this.map.tSize;
+      var maxY = this.map.rows * this.map.tSize;
+    //  this.x = Math.max(0, Math.min(this.x, maxX));
+    //  this.y = Math.max(0, Math.min(this.y, maxY));
+  } else  {Mouse.click.arrived = true; Game.hero.walking = false; console.log('arrived'); }
 };
 
 
 //calls async loading of image assets (resolves on load)
 Game.load = function () {
     return [
+        Loader.loadImage('frieza', './images/frieza.png'),
         Loader.loadImage('house', './images/house.png'),
         Loader.loadImage('tiles', './images/tiles.png'),
         Loader.loadImage('hero', './images/hero.png'),
+        Loader.loadImage('hero-flip', './images/hero-flip')
     ];
 };
 
 //initialization function
 Game.init = function () {
+    this.frieza.image = Loader.getImage('frieza');
     this.houseSprite = Loader.getImage('house');
     this.tileSet = Loader.getImage('tiles');
-    this.hero = new Hero(map, 150, 150);
+    this.hero = new Hero(map, 465, 4470);
     this.camera = new Camera(map, 512, 512);
     this.camera.follow(this.hero);
-    // create a canvas for each layer
-    // the map() call applies the function statements for each element in
-    // the iterable (the layers array)
-    this.layerCanvas = map.layers.map(function () {
-        var c = document.createElement('canvas');
-        c.width = CANVASWIDTH;
-        c.height = CANVASHEIGHT;
-        return c;
-    });
 
     // initial draw of the map
     // underscore prefix simply means the function is intended for
@@ -321,23 +379,20 @@ Game.init = function () {
 };
 
 Game.update = function (delta) {
-    this.hasScrolled = false;
-    // handle camera movement with arrow keys
+    Game.gameTime += delta;
     var dirx = 0;
     var diry = 0;
 
-    if(Mouse.isClick()){
-      console.log(map.isUnclickable(Mouse.click.x,Mouse.click.y));;
-      Mouse.click.used = true;
+    //checks the click object for a new click and moves the character if so.
+    if(Mouse.currentDest()){
+      this.hero.move(delta, Mouse.click.x,Mouse.click.y);
     }
 
-    if (dirx !== 0 || diry !== 0) {
-        this.camera.move(delta, dirx, diry);
-        this.hasScrolled = true;
+    if(map.isInteraction(this.hero.x,this.hero.y)){
+      console.log('interactive unit in range!');
     }
     this.camera.update();
 };
-
 Game._drawMap = function () {
     map.layers.forEach(function (layer, index) {
         this._drawLayer(index);
@@ -345,14 +400,12 @@ Game._drawMap = function () {
 };
 
 Game._drawLayer = function (layer) {
-    var context = this.layerCanvas[layer].getContext('2d');
-    context.clearRect(0, 0, CANVASWIDTH, CANVASHEIGHT);
 
     //calculates which tileMap elements are within camera view
     //and renders only those.
-
     //
     var startCol = Math.floor(this.camera.x / map.tSize);
+    //console.log(startCol);
     var endCol = startCol + (this.camera.width / map.tSize);
     var startRow = Math.floor(this.camera.y / map.tSize);
     var endRow = startRow + (this.camera.height / map.tSize);
@@ -361,23 +414,38 @@ Game._drawLayer = function (layer) {
 
     for (var c = startCol; c <= endCol; c++) {
         for (var r = startRow; r <= endRow; r++) {
-            var tile = map.getTile(layer, c, r);
-            var y = (c - startCol) * map.tSize + offsetX;
-            var x = (r - startRow) * map.tSize + offsetY;
-            if(tile === HOUSE){
-                context.drawImage(
+            var tile = map.getTile(layer, r, c);
+            var x = (c - startCol) * map.tSize + offsetX;
+            var y = (r - startRow) * map.tSize + offsetY;
+            switch(tile){
+              case 6:
+                this.ctx.drawImage(
                   this.houseSprite,
                   0,
                   0,
                   77,
                   115,
-                  Math.round(x),
-                  Math.round(y),
+                  Math.round(x) - 35,
+                  Math.round(y) - 40,
                   77,
                   115
                 );
-            }else if (tile !== 0) { // 0 => empty tile
-                context.drawImage(
+                break;
+              case 101:
+              this.ctx.drawImage(
+                this.frieza.image,
+                0,
+                0,
+                77,
+                115,
+                Math.round(x) - 35,
+                Math.round(y) - 40,
+                77,
+                115
+              );
+              break;
+              default: // 0 => empty tile
+                this.ctx.drawImage(
                     this.tileSet, // image
                     (tile - 1) * map.tSize, // source x
                     0, // source y
@@ -388,16 +456,36 @@ Game._drawLayer = function (layer) {
                     map.tSize, // target width
                     map.tSize // target height
                 );
+                break;
             }
         }
     }
 };
 
 Game.render = function () {
-    this.ctx.drawImage(this.layerCanvas[0], 0, 0);
-
+    let i = 1;
+    this._drawLayer(0);
     //draw hero
-    this.ctx.drawImage(
+    if(Game.hero.velX < 0){
+      if(Game.gameTime % 2 > 1){
+        if(i > 4){
+          i = 1;
+          console.log(i);
+          i++;
+        }
+      }
+      this.ctx.drawImage(
+        this.hero.imageFlip,
+        (i - 1) * map.tSize,
+        0,
+        map.tSize,
+        map.tSize,
+        this.hero.screenX - this.hero.width / 2,
+        this.hero.screenY - this.hero.height / 2,
+        map.tSize,
+        map.tSize
+      );
+    }else this.ctx.drawImage(
       this.hero.image,
       0,
       0,
@@ -408,9 +496,9 @@ Game.render = function () {
       map.tSize,
       map.tSize
     );
-
-    this.ctx.drawImage(this.layerCanvas[1], 0, 0);
+    this._drawLayer(1);
 };
+
 
 //
 // start up function
@@ -418,7 +506,7 @@ Game.render = function () {
 
 window.onload = function () {
   var canvas = document.getElementById('canvas');
-  canvas.onmouseup = Mouse.up;
+  canvas.addEventListener("click", Mouse.handleClick);
   canvas.width = CANVASWIDTH;
   canvas.height = CANVASHEIGHT;
   var context = canvas.getContext('2d');
