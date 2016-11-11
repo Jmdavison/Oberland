@@ -2,11 +2,16 @@
 
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
+<<<<<<< HEAD
 const MAPCOLS = 30;
+=======
+const MAPCOLS = 32;
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 const MAPROWS = 144;
 const NUMLAYERS = 2;
 const TILESIZE = 32;
 
+<<<<<<< HEAD
 
 //interactive objects
 const HOUSE = 6;
@@ -16,6 +21,10 @@ const FRIEZA = 101;
 
 //background objects
 const TREE = 2;
+=======
+const TREE = 2;
+const HOUSE = 6;
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 const BURNT_TREE = 5;
 const STREET = 3;
 const CONCRETE = 4;
@@ -27,6 +36,10 @@ const GRASS = 1;
 var Loader = {
     images: {}
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 //this asset load loads images the async Promise function and stores them
 //in the images object.
 Loader.loadImage = function (key, src) {
@@ -61,6 +74,7 @@ Mouse.click = {
   arrived: false,
 }
 
+<<<<<<< HEAD
 //click handler
 Mouse.handleClick = function (e) {
   Mouse.click.arrived = false;
@@ -68,12 +82,28 @@ Mouse.handleClick = function (e) {
   var event =  window.event || e;
   var destX = event.offsetX + Game.camera.x;
   var destY = event.offsetY + Game.camera.y;
+=======
+
+Mouse.handleClick = function (e) {
+  Mouse.click.arrived = false;
+  Game.hero.walking = true;
+  console.log('click');
+  var event =  window.event || e;
+  var destX = event.offsetX + Game.camera.x;
+  var destY = event.offsetY + Game.camera.y;
+  var y = event.offsetY;
+  var x = event.offsetX;
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 
   Mouse.click.x = destX;
   Mouse.click.y = destY;
   }
 
+<<<<<<< HEAD
 Mouse.currentDest = function (){
+=======
+Mouse.isClick = function (){
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 //    console.log(this.click.arrived);
     if(this.click.arrived == false && this.click.x !== -1){
       return true;
@@ -145,6 +175,7 @@ var generateMap = function (rows, cols, numLayers) {
           //generate first layer
           case 0:
           //make sure we have trees around the border, besides where we have streets
+<<<<<<< HEAD
             if(j >= rows - 8  && j <= rows -7) {layers[i][j*cols + k] = STREET;}
               //create the driveway
             else if(j >= rows - 6  &&  k == cols/2  ) {layers[i][j*cols + k] = CONCRETE;}
@@ -163,13 +194,34 @@ var generateMap = function (rows, cols, numLayers) {
             //create the street
           }else if((j == rows - 2) && (k == cols / 2  )){
               //create house
+=======
+            if(( j == 0 || (j == rows - 1) ||  k == 0 ||  (k == cols - 1)) && !(j >= rows - 8  && j <= rows -7) ){
+              //randomly place burnt trees
+              if(Math.random() * 10 <= 3){layers[i][j * cols + k] = BURNT_TREE;}
+              else layers[i][j * cols  + k] = TREE;
+              //create the street
+            }else if(j >= rows - 8  && j <= rows -7) {layers[i][j*cols + k] = STREET;}
+              //create the driveway
+            else if(j >= rows - 6  &&  k == cols/2  ) {layers[i][j*cols + k] = CONCRETE;}
+              //create grass
+            else {layers[i][j*cols + k] = GRASS;}
+            break;
+          //generate second layer
+          case 1:
+          //create house
+            if((j > rows - 3 && j < rows - 1) && (k > cols / 2 - 1 && k < cols / 2 + 1  )){
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
               layers[i][j*cols + k] = HOUSE;
             }else if(Math.random() * 100 < 3 && layers[i-1][j * cols + k] == GRASS){
               if(Math.random() * 10 <= 3){layers[i][j * cols + k] = BURNT_TREE;}
               else layers[i][j * cols  + k] = TREE;
+<<<<<<< HEAD
             }else{
               layers[i][j*cols + k] = 0;
             }
+=======
+            }else {layers[i][j*cols + k] = 0;}
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
           break;
             default: break;
         }
@@ -202,13 +254,33 @@ var map = {
   rows : MAPROWS,
   tSize : TILESIZE,
   numLayers : NUMLAYERS,
+<<<<<<< HEAD
   tiles: [],
+=======
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 
   layers: generateMap(MAPROWS,MAPCOLS,NUMLAYERS),
 
   getTile: function(layer, col, row) {
       return this.layers[layer][col * this.cols + row];
   },
+<<<<<<< HEAD
+=======
+
+  isUnclickable: function(x,y){
+    //takes x,y coordinates from the mouse function and checks if the tile is clickable
+      var col = Math.floor(x / this.tSize);
+      var row = Math.floor(y / this.tSize);
+      var found = false;
+
+      for(var i=0; i<this.layers.length;i++){
+        var tile = this.getTile(i, col, row);
+        found = tile === TREE || tile === HOUSE || tile === BURNT_TREE;
+        return found;
+        }
+      //return unclickable;
+  },
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
   getCol: function (x) {
     return Math.floor(x / this.tSize);
   },
@@ -220,6 +292,7 @@ var map = {
   },
   getY: function (row) {
     return row * this.tSize;
+<<<<<<< HEAD
   },
   isInteraction: function(x,y){
     //takes x,y coordinates from the mouse function and checks if the tile is clickable
@@ -242,6 +315,8 @@ var map = {
           return true;
         }
     }
+=======
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
   }
 }
 
@@ -299,6 +374,7 @@ Camera.prototype.update = function () {
   }
 };
 
+<<<<<<< HEAD
 //Friend Constructor
 function Friend(map, x, y){
   this.map = map;
@@ -311,6 +387,8 @@ function Friend(map, x, y){
 
 }
 
+=======
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 //Hero Constructor
 function Hero(map, x, y) {
     this.map = map;
@@ -322,7 +400,10 @@ function Hero(map, x, y) {
     this.velX = 0;
     this.velY = 0;
     this.image = Loader.getImage('hero');
+<<<<<<< HEAD
     this.imageFlip = Loader.getImage('hero-flip');
+=======
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 }
 
 Hero.SPEED = 250; // pixels per second
@@ -339,7 +420,11 @@ Hero.prototype.move = function (delta, destX, destY) {
       Game.hero.walking = true;
       this.velX = (tx / dist) * Hero.SPEED * delta;
       this.velY = (ty / dist) * Hero.SPEED * delta;
+<<<<<<< HEAD
     //console.log(this.velY + " " + this.velX);
+=======
+      console.log(this.velY + " " + this.velX);
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
         this.x += this.velX;
         this.y += this.velY;
 
@@ -351,6 +436,7 @@ Hero.prototype.move = function (delta, destX, destY) {
   } else  {Mouse.click.arrived = true; Game.hero.walking = false; console.log('arrived'); }
 };
 
+<<<<<<< HEAD
 
 //calls async loading of image assets (resolves on load)
 Game.load = function () {
@@ -360,15 +446,29 @@ Game.load = function () {
         Loader.loadImage('tiles', './images/tiles.png'),
         Loader.loadImage('hero', './images/hero.png'),
         Loader.loadImage('hero-flip', './images/hero-flip')
+=======
+//calls async loading of image assets (resolves on load)
+Game.load = function () {
+    return [
+        Loader.loadImage('house', './images/house.png'),
+        Loader.loadImage('tiles', './images/tiles.png'),
+        Loader.loadImage('hero', './images/hero.png'),
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
     ];
 };
 
 //initialization function
 Game.init = function () {
+<<<<<<< HEAD
     this.frieza.image = Loader.getImage('frieza');
     this.houseSprite = Loader.getImage('house');
     this.tileSet = Loader.getImage('tiles');
     this.hero = new Hero(map, 465, 4470);
+=======
+    this.houseSprite = Loader.getImage('house');
+    this.tileSet = Loader.getImage('tiles');
+    this.hero = new Hero(map, 488, 4521);
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
     this.camera = new Camera(map, 512, 512);
     this.camera.follow(this.hero);
 
@@ -379,10 +479,16 @@ Game.init = function () {
 };
 
 Game.update = function (delta) {
+<<<<<<< HEAD
+=======
+  //  this.hasScrolled = false;
+    // handle camera movement with arrow keys
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
     Game.gameTime += delta;
     var dirx = 0;
     var diry = 0;
 
+<<<<<<< HEAD
     //checks the click object for a new click and moves the character if so.
     if(Mouse.currentDest()){
       this.hero.move(delta, Mouse.click.x,Mouse.click.y);
@@ -393,6 +499,15 @@ Game.update = function (delta) {
     }
     this.camera.update();
 };
+=======
+    if(Mouse.isClick()){
+      this.hero.move(delta, Mouse.click.x,Mouse.click.y);
+    //  this.hasScrolled = true;
+    }
+    this.camera.update();
+};
+
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
 Game._drawMap = function () {
     map.layers.forEach(function (layer, index) {
         this._drawLayer(index);
@@ -403,6 +518,10 @@ Game._drawLayer = function (layer) {
 
     //calculates which tileMap elements are within camera view
     //and renders only those.
+<<<<<<< HEAD
+=======
+
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
     //
     var startCol = Math.floor(this.camera.x / map.tSize);
     //console.log(startCol);
@@ -417,14 +536,19 @@ Game._drawLayer = function (layer) {
             var tile = map.getTile(layer, r, c);
             var x = (c - startCol) * map.tSize + offsetX;
             var y = (r - startRow) * map.tSize + offsetY;
+<<<<<<< HEAD
             switch(tile){
               case 6:
+=======
+            if(tile === HOUSE){
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
                 this.ctx.drawImage(
                   this.houseSprite,
                   0,
                   0,
                   77,
                   115,
+<<<<<<< HEAD
                   Math.round(x) - 35,
                   Math.round(y) - 40,
                   77,
@@ -445,6 +569,14 @@ Game._drawLayer = function (layer) {
               );
               break;
               default: // 0 => empty tile
+=======
+                  Math.round(x),
+                  Math.round(y),
+                  77,
+                  115
+                );
+            }else if (tile !== 0) { // 0 => empty tile
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
                 this.ctx.drawImage(
                     this.tileSet, // image
                     (tile - 1) * map.tSize, // source x
@@ -456,7 +588,10 @@ Game._drawLayer = function (layer) {
                     map.tSize, // target width
                     map.tSize // target height
                 );
+<<<<<<< HEAD
                 break;
+=======
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
             }
         }
     }
@@ -466,6 +601,7 @@ Game.render = function () {
     let i = 1;
     this._drawLayer(0);
     //draw hero
+<<<<<<< HEAD
     if(Game.hero.velX < 0){
       if(Game.gameTime % 2 > 1){
         if(i > 4){
@@ -476,6 +612,13 @@ Game.render = function () {
       }
       this.ctx.drawImage(
         this.hero.imageFlip,
+=======
+    if(Game.hero.walking === true){
+      console.log("walking");
+      if(i >= 5){i = 1;}
+        this.ctx.drawImage(
+        this.hero.image,
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
         (i - 1) * map.tSize,
         0,
         map.tSize,
@@ -485,6 +628,10 @@ Game.render = function () {
         map.tSize,
         map.tSize
       );
+<<<<<<< HEAD
+=======
+      i++;
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
     }else this.ctx.drawImage(
       this.hero.image,
       0,
