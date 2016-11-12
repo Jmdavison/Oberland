@@ -1,5 +1,12 @@
 
 html,body,ul,li,h1,h2,h3,h4,p{margin:0; padding:0;}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+body{background-color:#326a8a;}
+>>>>>>> ef72b4344cf5ae98273f8b3f46b8fe3ee6c6b559
+>>>>>>> 18832de635ce09179a8ec5079bc7cceeb1d2d4a2
 .wrapper{width:100%;}
 body,canvas{transition: background-color 2s ease;}
 body.day{background-color:#8cc6ef;}
@@ -10,6 +17,7 @@ canvas.night{background-color:#7599da;}
     display:block;
     margin:0 auto;
     margin-top:50px;
+    background-color:#82bb65;
   }
 .shadow{
   -webkit-box-shadow: -4px 9px 47px -10px rgba(0,0,0,0.75);
