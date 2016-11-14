@@ -9,6 +9,21 @@ const TILESIZE = 32;
 //interactive objects
 const HOUSE = 6;
 
+const ITEMS = {
+              goldenNuggetPlus: 1001,
+              goldenNugget:1002,
+              gleamingMushroom:1003,
+              purpleOrb: 1004,
+              weirdClam: 1005,
+              humanHeart: 1006,
+              bigPill: 1007,
+              slimyDrink: 1008,
+              religiousObject: 1009,
+              saphireGem: 1010,
+              fineRuby: 1011
+             };
+
+
 var FRIENDS = {
                FRIEZA: 101,
                PICCOLO: 102,

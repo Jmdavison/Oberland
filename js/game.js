@@ -58,7 +58,7 @@ Camera.prototype.update = function () {
 };
 
 //Hero Constructor
-function Hero(heroNum,map, x, y) {
+function Hero(heroNum,map, x, y, inv) {
     Game.heroSelected = heroNum;
     this.map = map;
     this.x = x;
@@ -88,6 +88,8 @@ function Hero(heroNum,map, x, y) {
     this.velY = 0;
     this.image = Loader.getImage('hero'+heroNum);
     this.imageFlip = Loader.getImage('hero'+heroNum+'-flip');
+
+    this.inventory = inv || [];
 }
 
 Hero.SPEED = 200; // pixels per second
@@ -213,7 +215,7 @@ Game.startMenu = function(context, canvas) {
   if(Game.save){
     this.startMenu.buttons.push(new MenuButton(
         this.ctx,
-        "Load Game",
+        "Continue",
         this.bgX + (this.bgWidth / 2 + (this.bgWidth/2 - this.bgWidth/2.5)),
         this.bgY + (this.bgHeight / 2 - this.bgHeight/8),
         this.bgWidth / 3,
@@ -240,7 +242,7 @@ Game.characterSelect = function(save) {
   this.ctx.textAlign = "center";
   this.ctx.textBaseline = "middle";
   this.ctx.fillText(
-    "Select your character",
+    "Please Select your character",
     CANVASWIDTH/2,
     this.bgY
   );
@@ -303,20 +305,24 @@ Game.saveGame = function(){
   saveObj.heroX = this.hero.x;
   saveObj.heroY = this.hero.y;
   saveObj.heroSelected = Game.heroSelected;
+  saveObj.inventory = this.hero.inventory;
+  saveObj.itemsDown = this.itemsDown;
   if(window.localStorage.setItem('gameSave',JSON.stringify(saveObj))){
     return true;
   }else return false;
 }
 
 //this will handle hero interactions with NPCs, Objects, and the house
-Game.launchInteraction = function(){
-    switch(this.map.interaction){
-      case 6:
-        break;
-      default:
-        break;
-    }
-
+Game.launchInteraction = function(index){
+  //if the interaction is an item, add it to the inventory and show
+  //a message.
+  if(index >= 1000){
+    var obj = this.map.getItem(index);
+    this.hero.inventory.push(obj);
+  // this.displayItemInfo(obj);
+  }else if (index != 6){
+    var obj = this.map.getFriend(index);
+  }
 };
 
 //load friend images
@@ -336,6 +342,7 @@ Game.load = function () {
         Loader.loadImage('pink-ranger', './images/pink-ranger.png'),
         Loader.loadImage('house', './images/house.png'),
         Loader.loadImage('tiles', './images/tiles.png'),
+        Loader.loadImage('items', './images/items.png'),
         Loader.loadImage('hero1', './images/hero.png'),
         Loader.loadImage('hero2', './images/hero2.png'),
         Loader.loadImage('hero3', './images/hero3.png'),
@@ -348,15 +355,18 @@ Game.load = function () {
 
 //initialization function
 Game.init = function (save) {
+    this.itemsDown = [];
     this.map = new Map();
     if(save){
+      this.itemsDown = save.itemsDown;
       this.map.layers = save.layers;
-      this.hero = new Hero(save.heroSelected,this.map, save.heroX, save.heroY);
+      this.hero = new Hero(save.heroSelected,this.map, save.heroX, save.heroY, save.inventory);
       this.camera = new Camera(this.map, 512, 512);
     }else{
       this.hero = new Hero(Game.heroSelected,this.map, 465, 4470);
       this.camera = new Camera(this.map, 512, 512);
     }
+    this.map.itemsImage = Loader.getImage('items');
     this.loadFriends();
     this.houseSprite = Loader.getImage('house');
     this.tileSet = Loader.getImage('tiles');
@@ -417,6 +427,7 @@ Game._drawLayer = function (layer) {
             var tile = this.map.getTile(layer, r, c);
             var x = (c - startCol) * this.map.tSize + offsetX;
             var y = (r - startRow) * this.map.tSize + offsetY;
+            let friends = this.map.friends;
             switch(tile){
               case HOUSE:
                 this.ctx.drawImage(
@@ -439,7 +450,7 @@ Game._drawLayer = function (layer) {
                 break;
               case FRIENDS.FRIEZA:
                 this.ctx.drawImage(
-                  this.map.friends.frieza.image,
+                  friends.frieza.image,
                   0,
                   0,
                   96,
@@ -449,82 +460,88 @@ Game._drawLayer = function (layer) {
                   84,
                   84
                 );
-                this.ctx.save();
-                this.ctx.strokeStyle = "green";
-                this.ctx.beginPath();
-                this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-                this.ctx.stroke();
-                this.ctx.restore();
                 break;
             case FRIENDS.PICCOLO:
               this.ctx.drawImage(
-                this.map.friends.piccolo.image,
+                friends.piccolo.image,
                 0,
-                this.map.friends.piccolo.spriteY,
-                this.map.friends.piccolo.sourceWidth,
-                this.map.friends.piccolo.sourceHeight,
+                friends.piccolo.spriteY,
+                friends.piccolo.sourceWidth,
+                friends.piccolo.sourceHeight,
                 Math.round(x) - 12,
                 Math.round(y) - 14,
                 55,
                 55
               );
-              this.ctx.save();
-              this.ctx.strokeStyle = "green";
-              this.ctx.beginPath();
-              this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-              this.ctx.stroke();
-              this.ctx.restore();
+              // this.ctx.save();
+              // this.ctx.strokeStyle = "green";
+              // this.ctx.beginPath();
+              // this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
+              // this.ctx.stroke();
+              // this.ctx.restore();
               break;
             case FRIENDS.BLUE_RANGER:
               this.ctx.drawImage(
-                this.map.friends.blueRanger.image,
-                this.map.friends.blueRanger.spriteX,
-                this.map.friends.blueRanger.spriteY,
-                this.map.friends.blueRanger.sourceWidth,
-                this.map.friends.blueRanger.sourceHeight,
-                Math.round(x) - 12,
-                Math.round(y) - 14,
-                this.map.friends.blueRanger.sourceWidth * .8,
-                this.map.friends.blueRanger.sourceHeight * .8
+                friends.blueRanger.image,
+                friends.blueRanger.spriteX,
+                friends.blueRanger.spriteY,
+                friends.blueRanger.sourceWidth,
+                friends.blueRanger.sourceHeight,
+                Math.round(x),
+                Math.round(y) - 10,
+                friends.blueRanger.sourceWidth * .8,
+                friends.blueRanger.sourceHeight * .8
               );
-              this.ctx.save();
-              this.ctx.strokeStyle = "green";
-              this.ctx.beginPath();
-              this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-              this.ctx.stroke();
-              this.ctx.restore();
               break;
             case FRIENDS.PINK_RANGER:
               this.ctx.drawImage(
-                this.map.friends.pinkRanger.image,
-                this.map.friends.pinkRanger.spriteX,
-                this.map.friends.pinkRanger.spriteY,
-                this.map.friends.pinkRanger.sourceWidth,
-                this.map.friends.pinkRanger.sourceHeight,
-                Math.round(x) - 12,
-                Math.round(y) - 14,
+                friends.pinkRanger.image,
+                friends.pinkRanger.spriteX,
+                friends.pinkRanger.spriteY,
+                friends.pinkRanger.sourceWidth,
+                friends.pinkRanger.sourceHeight,
+                Math.round(x + 2),
+                Math.round(y - 14),
                 this.map.friends.pinkRanger.sourceWidth * .8,
                 this.map.friends.pinkRanger.sourceHeight * .8
               );
-              this.ctx.save();
-              this.ctx.strokeStyle = "green";
-              this.ctx.beginPath();
-              this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-              this.ctx.stroke();
-              this.ctx.restore();
               break;
             default: // 0 => empty tile
-                this.ctx.drawImage(
-                    this.tileSet, // image
-                    (tile - 1) * this.map.tSize, // source x
-                    0, // source y
-                    this.map.tSize, // source width
-                    this.map.tSize, // source height
-                    Math.round(x),  // target x
-                    Math.round(y), // target y
-                    this.map.tSize, // target width
-                    this.map.tSize // target height
-                );
+                if(tile >= 1000){
+                  //console.log(tile);
+                    var item = this.map.getItem(tile);
+                  //  console.log(item);
+                    this.ctx.drawImage(
+                      this.map.itemsImage,
+                      item.spriteIndex,
+                      0,
+                      this.map.itemsWidth,
+                      18,
+                      Math.round(x),
+                      Math.round(y),
+                      this.map.itemsWidth,
+                      18
+                    );
+                }else{
+                  this.ctx.drawImage(
+                      this.tileSet, // image
+                      (tile - 1) * this.map.tSize, // source x
+                      0, // source y
+                      this.map.tSize, // source width
+                      this.map.tSize, // source height
+                      Math.round(x),  // target x
+                      Math.round(y), // target y
+                      this.map.tSize, // target width
+                      this.map.tSize // target height
+                  );
+                }
+                //DISPLAYS GRID FOR DEBUGGING & INTERACTION ZONES
+                // this.ctx.save();
+                // this.ctx.strokeStyle = "green";
+                // this.ctx.beginPath();
+                // this.ctx.arc(x, y, 1, 0, Math.PI*2);
+                // this.ctx.stroke();
+                // this.ctx.restore();
                 break;
             }
         }

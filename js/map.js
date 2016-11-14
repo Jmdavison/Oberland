@@ -1,7 +1,20 @@
+
+
+//really nice little snippet gotten from Stackoverflow
+//grabs a random property of an oject
+function pickRandomProperty(obj) {
+    var result;
+    var count = 0;
+    for (var prop in obj)
+        if (Math.random() < 1/++count)
+           result = obj[prop];
+    return result;
+}
+
 //
 // Map Generator Function
 //
-var generateMap = function (rows, cols, numLayers,friends) {
+var generateMap = function (rows, cols, numLayers, friends, items) {
   var layers = new Array();
   for (var i = 0; i < numLayers; i++){
     layers[i] = new Array();
@@ -21,19 +34,39 @@ var generateMap = function (rows, cols, numLayers,friends) {
           //generate objects and friends layer
           case 1:
             if(j < rows - 10){
-              if((j > rows - 15) && friends.frieza.alreadyPlaced === false && k === friends.frieza.col){
-                layers[i][j*cols + k] = FRIENDS.FRIEZA;
-                friends.frieza.alreadyPlaced = true;
-            }else if((j > rows - 20) && friends.piccolo.alreadyPlaced === false && k === friends.piccolo.col){
-                layers[i][j*cols + k] = FRIENDS.PICCOLO;
-                friends.piccolo.alreadyPlaced = true;
-              }else if((j > rows - 25) && friends.blueRanger.alreadyPlaced === false && k === friends.blueRanger.col){
-                  layers[i][j*cols + k] = FRIENDS.BLUE_RANGER;
-                  friends.blueRanger.alreadyPlaced = true;
-                }else if((j > rows - 50) && friends.pinkRanger.alreadyPlaced === false && k === friends.pinkRanger.col){
-                    layers[i][j*cols + k] = FRIENDS.PINK_RANGER;
-                    friends.pinkRanger.alreadyPlaced = true;
-                  }else layers[i][j*cols + k] = 0;
+              var found=null;
+               for (var x in friends){
+                 if((j === friends[x].row) && (k === friends[x].col)){
+                //   console.log(x + " At " + j+","+k+" with index:" + friends[x].index);
+                  found = friends[x].index;
+                 }
+              }
+              if(found != null){
+                layers[i][j*cols + k] = found;
+              }
+              else {
+                if(Math.random() < .005){
+                  var item =  pickRandomProperty(items);
+                  layers[i][j*cols + k] = item.index;
+                  item.numPlaced++;
+                  Game.itemsDown.push(item.index + "-" + item.numPlaced);
+                }else layers[i][j*cols + k] = 0;
+              }
+            //   var rand = Math.random() * 5;
+            //   if((j > rows - 15) && friends.frieza.alreadyPlaced === false && k === friends.frieza.col){
+            //     layers[i][j*cols + k] = FRIENDS.FRIEZA;
+            //     friends.frieza.alreadyPlaced = true;
+            // }else if((j > rows - 20) && friends.piccolo.alreadyPlaced === false && k === friends.piccolo.col){
+            //     layers[i][j*cols + k] = FRIENDS.PICCOLO;
+            //     friends.piccolo.alreadyPlaced = true;
+            //   }else if((j > rows - 25) && friends.blueRanger.alreadyPlaced === false && k === friends.blueRanger.col){
+            //       layers[i][j*cols + k] = FRIENDS.BLUE_RANGER;
+            //       friends.blueRanger.alreadyPlaced = true;
+            //     }else if((j > rows - 50) && friends.pinkRanger.alreadyPlaced === false && k === friends.pinkRanger.col){
+            //         layers[i][j*cols + k] = FRIENDS.PINK_RANGER;
+            //         friends.pinkRanger.alreadyPlaced = true;
+            //       }else{
+            //       }
             }else layers[i][j*cols + k] = 0;
             break;
           //generate third layer
@@ -63,17 +96,17 @@ var generateMap = function (rows, cols, numLayers,friends) {
   }
 
 
-  var string = "";
-  for(var i = 0; i < layers.length; i++){
-    string += '\n \n';
-    for(var j = 0; j < rows; j++){
-      string += '\n';
-      for(var k = 0; k < cols; k++){
-        string += layers[i][j * cols + k];
-      }
-    }
-  }
-  console.log(string);
+  // var string = "";
+  // for(var i = 0; i < layers.length; i++){
+  //   string += '\n \n';
+  //   for(var j = 0; j < rows; j++){
+  //     string += '\n';
+  //     for(var k = 0; k < cols; k++){
+  //       string += layers[i][j * cols + k];
+  //     }
+  //   }
+  // }
+//  console.log(string);
   return layers;
 }
 
@@ -88,28 +121,112 @@ function Map() {
   this.tSize = TILESIZE;
   this.numLayers = NUMLAYERS;
   this.itemsImage = null;
+  this.itemsWidth = 16;
   this.items = {
     goldenNuggetPlus: {
-      name: "golden nugget",
+      index: ITEMS.goldenNuggetPlus,
+      name: "golden nugget plus+",
+      comment: "it's gotta be worth something",
       spriteIndex:0,
       rarity:10,
+      numPlaced:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     goldenNugget: {
+      index: ITEMS.goldenNugget,
       name: "golden nugget",
+      comment: "a golden nugget",
       spriteIndex:33,
       rarity:4,
+      numPlaced:0,
       col: Math.floor(Math.random() * 26) + 2
     },
-    sleamingMushroom: {
+    gleamingMushroom: {
+      index: ITEMS.gleamingMushroom,
       name: "gleaming mushroom",
+      comment: "This ought to do the trick",
       spriteIndex:33,
       rarity:4,
+      numPlaced:0,
       col: Math.floor(Math.random() * 26) + 2
-    }
+    },
+    purpleOrb: {
+      index: ITEMS.purpleOrb,
+      name:"magic purple orb",
+      comment: "wow..",
+      spriteIndex:64,
+      rarity: 2,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    weirdClam: {
+      index: ITEMS.weirdClam,
+    name: "really weird clam",
+    comment: "this thing is freaky",
+    spriteIndex:96,
+    rarity:7,
+    numPlaced:0,
+    col: Math.floor(Math.random() * 26) + 2
+    },
+    humanHeart: {
+      index: ITEMS.humanHeart,
+      name: "real human heart",
+      comment: "thats gross",
+      spriteIndex:129,
+      rarity:6,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    bigPill: {
+      index: ITEMS.bigPill,
+      name: "big pill",
+      comment: "you're gonna need some water",
+      spriteIndex:145,
+      rarity:3,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    slimyDrink: {
+      index: ITEMS.slimyDrink,
+      name: "slimy drink",
+      comment: "it looks disgusting",
+      spriteIndex:226,
+      rarity:3,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    religiousObject: {
+      index: ITEMS.religiousObject,
+      name: "religious object",
+      comment: "thats cool I guess",
+      spriteIndex:242,
+      rarity:3,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    saphireGem: {
+      index: ITEMS.saphireGem,
+      name: "saphire gem",
+      comment: "I think that's what saphire looks like",
+      spriteIndex:338,
+      rarity:14,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+    fineRuby: {
+      index: ITEMS.fineRuby,
+      name: "very fine ruby",
+      comment: "truly spectacular",
+      spriteIndex:388,
+      rarity:16,
+      numPlaced:0,
+      col: Math.floor(Math.random() * 26) + 2
+    },
+
   };
   this.friends = {
     pinkRanger: {
+              index: FRIENDS.PINK_RANGER,
               name : "pink ranger",
               image: null,
               currentConvo: 0,
@@ -124,9 +241,11 @@ function Map() {
               persuaded: false,
               frameIndexes: [0,50,103,160,222,280],
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2)
+              col: (Math.floor(Math.random() * 26) + 2),
+              row: (Math.floor(Math.random() * 144) + 10)
             },
     blueRanger: {
+              index:FRIENDS.BLUE_RANGER,
               name : "blue ranger",
               currentConvo: 0,
               image: null,
@@ -141,9 +260,11 @@ function Map() {
               persuaded: false,
               frameIndexes: [0,65,155,250],
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2)
+              col: (Math.floor(Math.random() * 26) + 2),
+              row: (Math.floor(Math.random() * 144) + 10)
             },
     frieza: {
+              index:FRIENDS.FRIEZA,
               name : "frieza",
               currentConvo: 0,
               image: null,
@@ -156,9 +277,11 @@ function Map() {
               imgLoaded: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2)
+              col: (Math.floor(Math.random() * 26) + 2),
+              row: (Math.floor(Math.random() * 144) + 10)
             },
     piccolo: {
+              index:FRIENDS.PICCOLO,
               name : "piccolo",
               currentConvo: 0,
               image: null,
@@ -172,16 +295,32 @@ function Map() {
               alreadyPlaced: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2)
+              col: (Math.floor(Math.random() * 26) + 2),
+              row: (Math.floor(Math.random() * 144) + 10)
             }
   };
   this.interaction = 0;
 
-  this.layers = generateMap(MAPROWS,MAPCOLS,NUMLAYERS,this.friends);
+  this.layers = generateMap(MAPROWS,MAPCOLS,NUMLAYERS,this.friends,this.items);
+
+  this.getItem = function(index){
+    for (var item in this.items)
+      if(this.items[item].index === index)
+        return this.items[item];
+  };
+
+  this.getFriend = function(index){
+    for (var i in this.friends)
+      if(this.friends[i].index === index)
+        return this.friends[i];
+  };
 
   this.getTile = function(layer, col, row) {
       return this.layers[layer][col * this.cols + row];
   };
+  this.clearTile = function(layer, col, row){
+    this.layers[layer][col * this.cols + row] = 0;
+  }
   this.getCol = function (x) {
     return Math.floor(x / this.tSize);
   };
@@ -199,34 +338,29 @@ function Map() {
       var col = this.getCol(y);
       var row = this.getRow(x);
 
-      for(var i=0; i<this.layers.length;i++){
-          if(this.getTile(i, col, row) > 5 ){
-            this.interaction = this.getTile(i, col, row);
-            return true;
-          }if(this.getTile(i, col - 1, row) > 5 ){
-            this.interaction = this.getTile(i, col - 1, row);
-            return true;
-          }if(this.getTile(i, col + 1, row) > 5 ){
-            this.interaction = this.getTile(i, col + 1, row);
-            return true;
-          }if(this.getTile(i, col, row + 1) > 5 ){
-            this.interaction = this.getTile(i, col, row + 1);
-            return true;
-          }if(this.getTile(i, col, row - 1) > 5 ){
-            this.interaction = this.getTile(i, col, row - 1);
-            return true;
-          }if(this.getTile(i, col + 1, row - 1) > 5 ){
-            this.interaction = this.getTile(i, col + 1, row - 1);
-            return true;
-          }if(this.getTile(i, col + 1, row + 1) > 5 ){
-            this.interaction = this.getTile(i, col + 1, row + 1);
-            return true;
-          }if(this.getTile(i, col - 1, row - 1) > 5 ){
-            this.interaction = this.getTile(i, col - 1, row - 1);
-            return true;
-          }if(this.getTile(i, col - 1, row + 1) > 5 ){
-            this.interaction = this.getTile(i, col - 1, row + 1);
-            return true;
+      if(this.getTile(1,col, row) > 1000){
+        console.log("on top of item!!");
+        Game.launchInteraction(this.getTile(1,col,row));
+        this.clearTile(1, col, row);
+      }else{
+        for(var i=0; i<this.layers.length;i++){
+          var tilesAround = [
+            this.getTile(i, col, row),
+            this.getTile(i, col - 1, row),
+            this.getTile(i, col + 1, row),
+            this.getTile(i, col, row + 1),
+            this.getTile(i, col, row - 1),
+            this.getTile(i, col + 1, row - 1),
+            this.getTile(i, col + 1, row + 1),
+            this.getTile(i, col - 1, row - 1),
+            this.getTile(i, col - 1, row + 1)
+          ];
+            for(var j = 0; j < tilesAround.length; j++){
+              if(tilesAround[j] > 5 && tilesAround[j] < 1000){
+                console.log("house or friend in range");
+                Game.launchInteraction(tilesAround[j]);
+              }
+            }
           }
         }
       };
