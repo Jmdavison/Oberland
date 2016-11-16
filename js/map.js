@@ -37,7 +37,7 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
               var found=null;
                for (var x in friends){
                  if((j === friends[x].row) && (k === friends[x].col)){
-                //   console.log(x + " At " + j+","+k+" with index:" + friends[x].index);
+                   // console.log(x + " At " + j+","+k+" with index:" + friends[x].index);
                   found = friends[x].index;
                  }
               }
@@ -49,24 +49,8 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
                   var item =  pickRandomProperty(items);
                   layers[i][j*cols + k] = item.index;
                   item.numPlaced++;
-                  Game.itemsDown.push(item.index + "-" + item.numPlaced);
                 }else layers[i][j*cols + k] = 0;
               }
-            //   var rand = Math.random() * 5;
-            //   if((j > rows - 15) && friends.frieza.alreadyPlaced === false && k === friends.frieza.col){
-            //     layers[i][j*cols + k] = FRIENDS.FRIEZA;
-            //     friends.frieza.alreadyPlaced = true;
-            // }else if((j > rows - 20) && friends.piccolo.alreadyPlaced === false && k === friends.piccolo.col){
-            //     layers[i][j*cols + k] = FRIENDS.PICCOLO;
-            //     friends.piccolo.alreadyPlaced = true;
-            //   }else if((j > rows - 25) && friends.blueRanger.alreadyPlaced === false && k === friends.blueRanger.col){
-            //       layers[i][j*cols + k] = FRIENDS.BLUE_RANGER;
-            //       friends.blueRanger.alreadyPlaced = true;
-            //     }else if((j > rows - 50) && friends.pinkRanger.alreadyPlaced === false && k === friends.pinkRanger.col){
-            //         layers[i][j*cols + k] = FRIENDS.PINK_RANGER;
-            //         friends.pinkRanger.alreadyPlaced = true;
-            //       }else{
-            //       }
             }else layers[i][j*cols + k] = 0;
             break;
           //generate third layer
@@ -95,18 +79,18 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
     }
   }
 
-
-  // var string = "";
-  // for(var i = 0; i < layers.length; i++){
-  //   string += '\n \n';
-  //   for(var j = 0; j < rows; j++){
-  //     string += '\n';
-  //     for(var k = 0; k < cols; k++){
-  //       string += layers[i][j * cols + k];
-  //     }
-  //   }
-  // }
-//  console.log(string);
+  // PRINT LAYERS ARRAY FOR DEBUGGING PURPOSES
+  var string = "";
+  for(var i = 0; i < layers.length; i++){
+    string += '\n \n';
+    for(var j = 0; j < rows; j++){
+      string += '\n';
+      for(var k = 0; k < cols; k++){
+        string += layers[i][j * cols + k];
+      }
+    }
+  }
+ console.log(string);
   return layers;
 }
 
@@ -125,11 +109,12 @@ function Map() {
   this.items = {
     goldenNuggetPlus: {
       index: ITEMS.goldenNuggetPlus,
-      name: "golden nugget plus+",
+      name: "special golden nugget",
       comment: "it's gotta be worth something",
       spriteIndex:0,
       rarity:10,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     goldenNugget: {
@@ -139,15 +124,17 @@ function Map() {
       spriteIndex:33,
       rarity:4,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     gleamingMushroom: {
       index: ITEMS.gleamingMushroom,
       name: "gleaming mushroom",
       comment: "This ought to do the trick",
-      spriteIndex:33,
+      spriteIndex:112,
       rarity:4,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     purpleOrb: {
@@ -157,24 +144,27 @@ function Map() {
       spriteIndex:64,
       rarity: 2,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     weirdClam: {
       index: ITEMS.weirdClam,
-    name: "really weird clam",
-    comment: "this thing is freaky",
-    spriteIndex:96,
-    rarity:7,
-    numPlaced:0,
-    col: Math.floor(Math.random() * 26) + 2
+      name: "really weird clam",
+      comment: "this thing is freaky",
+      spriteIndex:96,
+      rarity:7,
+      numPlaced:0,
+      numberOwned:0,
+      col: Math.floor(Math.random() * 26) + 2
     },
     humanHeart: {
       index: ITEMS.humanHeart,
       name: "real human heart",
-      comment: "thats gross",
+      comment: "that's gross",
       spriteIndex:129,
       rarity:6,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     bigPill: {
@@ -184,6 +174,7 @@ function Map() {
       spriteIndex:145,
       rarity:3,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     slimyDrink: {
@@ -193,6 +184,7 @@ function Map() {
       spriteIndex:226,
       rarity:3,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     religiousObject: {
@@ -202,6 +194,7 @@ function Map() {
       spriteIndex:242,
       rarity:3,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     saphireGem: {
@@ -211,6 +204,7 @@ function Map() {
       spriteIndex:338,
       rarity:14,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
     fineRuby: {
@@ -220,37 +214,39 @@ function Map() {
       spriteIndex:388,
       rarity:16,
       numPlaced:0,
+      numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
-
   };
+
   this.friends = {
     pinkRanger: {
               index: FRIENDS.PINK_RANGER,
               name : "pink ranger",
               image: null,
               currentConvo: 0,
-              convo: ["Hello !name, I am your friend. Bring me 5 red gems and I will defend the little shack you call home.",
+              quest: null,
+              convo: ["Hello there, I'm here to help! \n Bring me !num !questItem \n and I'll make it worth your while.",
                       "Ahh, I see you have the gems, Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 34,
               sourceHeight: 63,
               spriteX: 14,
               spriteY: 12,
-              alreadyPlaced: false,
-              persuaded: false,
               frameIndexes: [0,50,103,160,222,280],
+              alreadyPlaced: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2),
-              row: (Math.floor(Math.random() * 144) + 10)
+              col: (Math.floor(Math.random() * (MAPCOLS-2)) + 2),
+              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     blueRanger: {
               index:FRIENDS.BLUE_RANGER,
               name : "blue ranger",
               currentConvo: 0,
               image: null,
-              convo: ["Hello !name, I am your friend. Bring me 5 red gems and I will defend the little shack you call home.",
-                      "Ahh, I see you have the gems, Would you like me to join your team?",
+              quest: null,
+              convo: ["Hello there, I'm here to help! \n Bring me !num !questItem \n and I'll make it worth your while.",
+                      "Ahh, I see you have the items, \n Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 35,
               sourceHeight: 63,
@@ -260,15 +256,16 @@ function Map() {
               persuaded: false,
               frameIndexes: [0,65,155,250],
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2),
-              row: (Math.floor(Math.random() * 144) + 10)
+              col: (Math.floor(Math.random() * (MAPCOLS-2)) + 2),
+              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     frieza: {
               index:FRIENDS.FRIEZA,
               name : "frieza",
               currentConvo: 0,
               image: null,
-              convo: ["Hello !name, I am FRIEZA. Bring me 5 red gems and I will defend the little shack you call home.",
+              quest: null,
+              convo: ["Hello peasant, I am FRIEZA. Bring \n  me !num !questItem and I will \n defend the little shack you call home.",
                       "Ahh, I see you have the gems, Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 96,
@@ -277,16 +274,17 @@ function Map() {
               imgLoaded: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2),
-              row: (Math.floor(Math.random() * 144) + 10)
+              col: (Math.floor(Math.random() * (MAPCOLS-2)) + 2),
+              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     piccolo: {
               index:FRIENDS.PICCOLO,
               name : "piccolo",
               currentConvo: 0,
               image: null,
-              convo: ["Hello !name, I am piccolo. Bring me 5 red gems and I will defend the little shack you call home.",
-                      "Ahh, I see you have the gems, Would you like me to join your team?",
+              quest: null,
+              convo: ["Hello traveler, I am piccolo. \n Bring me !num !questItem and I will keep \n you safe from your\n enemies.",
+                      "Ahh, I see you have the gems, \n  Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 74,
               sourceHeight: 90,
@@ -295,8 +293,8 @@ function Map() {
               alreadyPlaced: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * 26) + 2),
-              row: (Math.floor(Math.random() * 144) + 10)
+              col: (Math.floor(Math.random() * (MAPCOLS-2)) + 2),
+              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             }
   };
   this.interaction = 0;
@@ -340,8 +338,9 @@ function Map() {
 
       if(this.getTile(1,col, row) > 1000){
         console.log("on top of item!!");
-        Game.launchInteraction(this.getTile(1,col,row));
+        Game.currentInteraction = this.getTile(1,col,row);
         this.clearTile(1, col, row);
+        return true;
       }else{
         for(var i=0; i<this.layers.length;i++){
           var tilesAround = [
@@ -357,11 +356,33 @@ function Map() {
           ];
             for(var j = 0; j < tilesAround.length; j++){
               if(tilesAround[j] > 5 && tilesAround[j] < 1000){
-                console.log("house or friend in range");
-                Game.launchInteraction(tilesAround[j]);
+                Game.currentInteraction = tilesAround[j];
+                return true;
               }
             }
           }
+          return false;
         }
       };
+  this.availableQuests = [];
+  this.getQuest = function(){
+    var rand = Math.floor(Math.random()*this.availableQuests.length + 1);
+    var quest = this.availableQuests[rand];
+    this.availableQuests.splice(rand,1);
+    return quest;
+  }
+  this.loadQuests = function(){
+    for (var x in this.items){
+      this.availableQuests.push({
+        itemName: this.items[x].name,
+        numRequired: this.items[x].numPlaced - Math.floor(this.items[x].numPlaced/4)
+      });
     }
+    for(var x in this.friends){
+      this.friends[x].quest = this.getQuest();
+      this.friends[x].convo[0] = this.friends[x].convo[0].replace(/!questItem/g, this.friends[x].quest.itemName);
+      this.friends[x].convo[0] = this.friends[x].convo[0].replace(/!num/g, this.friends[x].quest.numRequired);
+    }
+  };
+  this.loadQuests();
+}

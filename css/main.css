@@ -1,6 +1,12 @@
+@font-face {
+    font-family: "PixelType";
+    src: url("PixelType.woff") format('woff');
+}
+
 
 html,body,ul,li,h1,h2,h3,h4,p{margin:0; padding:0;}
 .wrapper{width:100%;}
+body,.wrapper,canvas{font-family: 'PixelType'}
 body,canvas{transition: background-color 2s ease;}
 body.day{background-color:#8cc6ef;}
 canvas.day{background-color:##97e470;}

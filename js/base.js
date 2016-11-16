@@ -1,10 +1,9 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 30;
-const MAPROWS = 144;
+const MAPCOLS = 64;
+const MAPROWS = 64;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
-
 
 //interactive objects
 const HOUSE = 6;
@@ -22,8 +21,6 @@ const ITEMS = {
               saphireGem: 1010,
               fineRuby: 1011
              };
-
-
 var FRIENDS = {
                FRIEZA: 101,
                PICCOLO: 102,
@@ -67,10 +64,48 @@ Loader.loadImage = function (key, src) {
 Loader.getImage = function (key) {
     return (key in this.images) ? this.images[key] : null;
 };
+/*Keyboard handler*/
+var Keyboard = {};
+
+Keyboard.Q = 81;
+Keyboard.ESC = 27;
+
+Keyboard._keys = {};
+
+Keyboard.listenForEvents = function (keys) {
+    window.addEventListener('keydown', this._onKeyDown.bind(this));
+    window.addEventListener('keyup', this._onKeyUp.bind(this));
+
+    keys.forEach(function(key) {
+        this._keys[key] = false;
+    }.bind(this));
+  }
+
+Keyboard._onKeyDown = function (event) {
+    var keyCode = event.keyCode;
+    if (keyCode in this._keys) {
+        event.preventDefault();
+        this._keys[keyCode] = true;
+    }
+  };
+
+Keyboard._onKeyUp = function (event) {
+    var keyCode = event.keyCode;
+    if (keyCode in this._keys) {
+        event.preventDefault();
+        this._keys[keyCode] = false;
+    }
+  };
+
+Keyboard.isDown = function (keyCode) {
+    if (!keyCode in this._keys) {
+        throw new Error('Keycode ' + keyCode + ' is not being listened to');
+    }
+    return this._keys[keyCode];
+  };
 
 
 /* mouse input handling */
-
 var Mouse = {};
 Mouse.click = {
   x: -1,
@@ -79,7 +114,8 @@ Mouse.click = {
 }
 
 //click handler
-Mouse.handleClick = function(e) {
+Mouse.handleDown = function(e) {
+  console.log("down");
   var event =  window.event || e;
   if(Game.inStartMenu){
     for(var i=0; i < Game.startMenu.buttons.length; i++){
@@ -102,6 +138,8 @@ Mouse.handleClick = function(e) {
        ){button.action();}
     }
   }else{
+    event.preventDefault();
+    Mouse.down = true;
     Mouse.click.arrived = false;
     Game.hero.walking = true;
     var destX = event.offsetX + Game.camera.x;
@@ -112,9 +150,14 @@ Mouse.handleClick = function(e) {
   }
 }
 
+Mouse.handleUp = function(e){
+  Mouse.down = false;
+  console.console.log('up');
+}
+
 Mouse.currentDest = function (){
 //    console.log(this.click.arrived);
-    if(this.click.arrived == false && this.click.x !== -1){
+    if(Mouse.down == true || this.click.arrived == false && this.click.x !== -1){
       return true;
     }else return false;
   }

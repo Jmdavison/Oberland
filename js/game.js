@@ -106,14 +106,13 @@ Hero.prototype.move = function (delta, destX, destY) {
       Game.hero.walking = true;
       this.velX = (tx / dist) * Hero.SPEED * delta;
       this.velY = (ty / dist) * Hero.SPEED * delta;
-    //console.log(this.velY + " " + this.velX);
-        this.x += this.velX;
-        this.y += this.velY;
-
+      //console.log(this.velY + " " + this.velX);
+      this.x += this.velX;
+      this.y += this.velY;
       // clamp values
       var maxX = this.map.cols * this.map.tSize;
       var maxY = this.map.rows * this.map.tSize;
-  } else  {Mouse.click.arrived = true; Game.hero.walking = false;}
+    } else  {Mouse.click.arrived = true; Game.hero.walking = false;}
 };
 
 function MenuButton(ctx, name, x, y, width, height, bg, color, action) {
@@ -124,20 +123,21 @@ function MenuButton(ctx, name, x, y, width, height, bg, color, action) {
     this.width = width;
     this.height = height;
     this.color = color;
-    (function draw(ctx){
+    (function _draw(ctx){
       var ctx = ctx;
       ctx.save();
         ctx.fillStyle = bg;
         ctx.fillRect(x,y,width,height);
-        ctx.font = "18px monospace";
+        ctx.font = "30px PixelType";
         ctx.fillStyle = color;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(
           name,
           x + (width/2),
-          y + (height/2)
+          y + (height/2)+3
         );
+      ctx.restore();
     })(ctx);
 }
 
@@ -181,6 +181,7 @@ Game.tick = function(elapsed) {
 
 Game.startMenu = function(context, canvas) {
   //display starting UI
+  var bg = Loader.getImage("startbg");
   this.inStartMenu = true;
   this.ctx = context;
   this.startMenu.buttons = [];
@@ -188,15 +189,22 @@ Game.startMenu = function(context, canvas) {
   this.bgY = CANVASHEIGHT / 4;
   this.bgWidth = CANVASWIDTH - 2*this.bgX;
   this.bgHeight = CANVASHEIGHT - 2*this.bgY;
-  this.ctx.font = "18px monospace";
-  this.ctx.fillStyle = "#333";
+  this.ctx.save();
+  this.ctx.font = "40px PixelType";
+  this.ctx.fillStyle = "#fff";
   this.ctx.textAlign = "center";
   this.ctx.textBaseline = "middle";
+  this.ctx.drawImage(bg,0,0,CANVASWIDTH,CANVASHEIGHT);
   this.ctx.fillText(
-    "Welcome, how would you like to start?",
+    "Hey! You finally woke up,",
     CANVASWIDTH/2,
     this.bgY
   );
+  this.ctx.fillText(
+      "better get started now.",
+      CANVASWIDTH/2,
+      this.bgY + 40
+    );
   this.startMenu.buttons.push(new MenuButton(
       this.ctx,
       "Start New",
@@ -204,7 +212,7 @@ Game.startMenu = function(context, canvas) {
       this.bgY + (this.bgHeight / 2 - this.bgHeight/8),
       this.bgWidth / 3,
       this.bgHeight / 4,
-      "#27801c",
+      "#1c2480",
       "#fff",
       function(){
         Game.inStartMenu = false;
@@ -220,7 +228,7 @@ Game.startMenu = function(context, canvas) {
         this.bgY + (this.bgHeight / 2 - this.bgHeight/8),
         this.bgWidth / 3,
         this.bgHeight / 4,
-        "#27801c",
+        "#1c2480",
         "#fff",
         function(){
           Game.inStartMenu = false;
@@ -228,7 +236,8 @@ Game.startMenu = function(context, canvas) {
         }
       ));
     }
-  }
+    this.ctx.restore();
+  };
 
 Game.characterSelect = function(save) {
   var imageWidth = 50;
@@ -237,12 +246,13 @@ Game.characterSelect = function(save) {
   var hero3 = Loader.getImage("hero3");
   this.characterSelect.buttons = [];
   this.ctx.clearRect(0,0,CANVASWIDTH,CANVASHEIGHT);
-  this.ctx.font = "18px monospace";
+  this.ctx.save();
+  this.ctx.font = "40px PixelType";
   this.ctx.fillStyle = "#333";
   this.ctx.textAlign = "center";
   this.ctx.textBaseline = "middle";
   this.ctx.fillText(
-    "Please Select your character",
+    "Please select your character",
     CANVASWIDTH/2,
     this.bgY
   );
@@ -294,8 +304,37 @@ Game.characterSelect = function(save) {
           Game.startNew();
         }
         ));
+  this.ctx.restore();
+};
 
-}
+//this will handle hero interactions with NPCs, Objects, and the house
+Game.launchInteraction = function(){
+  //if the interaction is an item, add it to the inventory and show
+  //a message.
+  var index = this.currentInteraction;
+  var item = this.map.getItem(index);
+  var flag = false;
+
+  if(index >= 1000){
+    //BEGIN ITEM INTERACTION
+     for(var i = 0; i < this.hero.inventory.length; i++){
+        if(this.hero.inventory[i].index == index){
+          this.hero.inventory[i].numberOwned += 1;
+          flag = true;
+        }
+      }
+      if(flag == false){
+        item.numberOwned += 1;
+        this.hero.inventory.push(item);
+      }
+    item.notif = item.name + " + 1";
+    this.uiStream.push([item,this.gameTime]);
+  }else if (index !== 6){
+    //BEGIN CHARACTER INTERACTION
+    var obj = this.map.getFriend(index);
+    this.friendInteraction = [ obj, this.gameTime ];
+  }
+};
 
 //saves important game objects to local storage
 Game.saveGame = function(){
@@ -306,24 +345,12 @@ Game.saveGame = function(){
   saveObj.heroY = this.hero.y;
   saveObj.heroSelected = Game.heroSelected;
   saveObj.inventory = this.hero.inventory;
-  saveObj.itemsDown = this.itemsDown;
+  saveObj.friends = this.map.friends;
   if(window.localStorage.setItem('gameSave',JSON.stringify(saveObj))){
     return true;
   }else return false;
 }
 
-//this will handle hero interactions with NPCs, Objects, and the house
-Game.launchInteraction = function(index){
-  //if the interaction is an item, add it to the inventory and show
-  //a message.
-  if(index >= 1000){
-    var obj = this.map.getItem(index);
-    this.hero.inventory.push(obj);
-  // this.displayItemInfo(obj);
-  }else if (index != 6){
-    var obj = this.map.getFriend(index);
-  }
-};
 
 //load friend images
 Game.loadFriends = function() {
@@ -336,6 +363,8 @@ Game.loadFriends = function() {
 //calls async loading of image assets (resolves on load)
 Game.load = function () {
     return [
+        document.fonts.load("18px PixelType"),
+        Loader.loadImage('startbg', './images/bgimg.png'),
         Loader.loadImage('piccolo', './images/piccolo.png'),
         Loader.loadImage('frieza', './images/frieza.png'),
         Loader.loadImage('blue-ranger', './images/blue-ranger.png'),
@@ -355,15 +384,20 @@ Game.load = function () {
 
 //initialization function
 Game.init = function (save) {
-    this.itemsDown = [];
+    this.displayBackpack = false;
+    this.displayGameInfo = false;
+    this.friendInteraction = null;
+    this.uiStream = [];
+    Keyboard.listenForEvents([Keyboard.Q,Keyboard.ESC]);
     this.map = new Map();
     if(save){
       this.itemsDown = save.itemsDown;
       this.map.layers = save.layers;
+      this.map.friends = save.friends;
       this.hero = new Hero(save.heroSelected,this.map, save.heroX, save.heroY, save.inventory);
       this.camera = new Camera(this.map, 512, 512);
     }else{
-      this.hero = new Hero(Game.heroSelected,this.map, 465, 4470);
+      this.hero = new Hero(Game.heroSelected,this.map, (MAPCOLS*TILESIZE)/2, (MAPROWS*TILESIZE) - 150);
       this.camera = new Camera(this.map, 512, 512);
     }
     this.map.itemsImage = Loader.getImage('items');
@@ -388,21 +422,130 @@ Game.update = function (delta) {
     }else if(Math.floor(this.gameTime % 11) === 0 && this.saved == true){
       this.saved =false;
     }
-  //  console.log(this.gameTime % 31);
-    var dirx = 0;
-    var diry = 0;
-
+    //if key is held display appropriate info
+    if(Keyboard.isDown(Keyboard.Q)){this.displayBackpack = true;console.log("down");}
+    else if (Keyboard.isDown(Keyboard.ESC)){this.displayGameInfo = true;}
+    else {this.displayBackpack = false; this.displayGameInfo = false;}
     //checks the click object for a new click and moves the character if so.
     if(Mouse.currentDest()){
       this.hero.move(delta, Mouse.click.x,Mouse.click.y);
     }
 
     if(this.map.isInteraction(this.hero.x,this.hero.y)){
-      console.log('interactive unit in range! Code: ' + this.map.interaction);
-    //  this.launchInteraction();
+    //  console.log('interactive unit in range! Code: ' + this.map.interaction);
+        Game.launchInteraction();
     }
     this.camera.update();
 };
+
+Game._displayGameInfo = function(){
+    this.ctx.fillRect(100,100,CANVASWIDTH-200,CANVASHEIGHT-200);
+    this.ctx.fillText("GAME INFO", 200, 200);
+};
+
+Game._displayBackpack = function(){
+    this.ctx.fillRect(100,100,CANVASWIDTH-200,CANVASHEIGHT-200);
+    this.ctx.fillText("BACKPACK", 200, 200);
+};
+
+Game._displayFriendInteraction = function(){
+  if(this.friendInteraction != null){
+    var since = this.gameTime - this.friendInteraction[1];
+    var friend = this.friendInteraction[0]
+    this.ctx.save();
+      this.ctx.fillStyle = "#BDA26E;"
+      var txtWidth = this.ctx.measureText(friend.convo[friend.convoIndex]);
+      this.ctx.fillRect(friend.x-25,friend.y-15, txtWidth + 15, 50);
+      this.ctx.strokeStyle = "#1C1200";
+      this.ctx.lineWidth = 3;
+      this.ctx.strokeRect(friend.x-25,friend.y-15, txtWidth + 15, 50);
+      this.ctx.fillStyle="30px PixelType";
+      this.ctx.fillText(friend.convo[friend.currentConvo],friend.x-25,friend.y-15);
+    this.ctx.restore();
+    if(since > 5 ){
+      this.friendInteraction = null;
+    }
+  }
+};
+
+Game._displayUI = function(){
+    this.ctx.fillStyle = "28px PixelType";
+    this.ctx.strokeStyle = "white";
+    if(this.uiStream.length > 0){
+      for(var i = 0; i < this.uiStream.length; i++){
+        var timeSince = this.gameTime - this.uiStream[i][1];
+        //console.log(timeSince);
+        this.ctx.fillText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-50)-(i*5)+(10*timeSince)));
+        if(timeSince > 10){
+        this.uiStream.shift();
+        }
+      }
+    }
+};
+
+Game._drawHero = function(){
+    //draw hero
+    if(Game.hero.velX < 0){
+      if(Game.hero.walking === true){
+        if((Game.gameTime % 1) == .25){
+          if(i > 4){
+            i = 1;
+            i++;
+          }
+        }
+        this.ctx.drawImage(
+          this.hero.imageFlip,
+          Math.floor((Game.gameTime % .4) * 10) * this.hero.width,
+          0,
+          this.hero.width,
+          this.hero.height,
+          this.hero.screenX - this.hero.width / 2,
+          this.hero.screenY - this.hero.height + 10,
+          this.hero.width,
+          this.hero.height
+        );
+      }else{
+        this.ctx.drawImage(
+          this.hero.imageFlip,
+          this.hero.flipOffset,
+          0,
+          this.hero.width,
+          this.hero.height,
+          this.hero.screenX - this.hero.width / 2,
+          this.hero.screenY - this.hero.height + 10,
+          this.hero.width,
+          this.hero.height
+        );
+      }
+    }else {
+    if(this.hero.walking === true){
+        this.ctx.drawImage(
+          this.hero.image,
+          Math.floor((Game.gameTime % .4) * 10) * this.hero.width,
+          0,
+          this.hero.width,
+          this.hero.height,
+          this.hero.screenX - this.hero.width / 2,
+          this.hero.screenY - this.hero.height + 10,
+          this.hero.width,
+          this.hero.height
+        );
+      }else{
+        this.ctx.drawImage(
+          this.hero.image,
+          this.hero.standOffset,
+          0,
+          this.hero.width,
+          this.hero.height,
+          this.hero.screenX - this.hero.width / 2,
+          this.hero.screenY - this.hero.height + 10,
+          this.hero.width,
+          this.hero.height
+        );
+      }
+    }
+  };
+
 Game._drawMap = function () {
     this.map.layers.forEach(function (layer, index) {
         this._drawLayer(index);
@@ -427,7 +570,7 @@ Game._drawLayer = function (layer) {
             var tile = this.map.getTile(layer, r, c);
             var x = (c - startCol) * this.map.tSize + offsetX;
             var y = (r - startRow) * this.map.tSize + offsetY;
-            let friends = this.map.friends;
+            var friends = this.map.friends;
             switch(tile){
               case HOUSE:
                 this.ctx.drawImage(
@@ -449,6 +592,8 @@ Game._drawLayer = function (layer) {
                 this.ctx.restore();
                 break;
               case FRIENDS.FRIEZA:
+                friends.frieza.x = Math.round(x);
+                friends.frieza.y = Math.round(y);
                 this.ctx.drawImage(
                   friends.frieza.image,
                   0,
@@ -462,6 +607,8 @@ Game._drawLayer = function (layer) {
                 );
                 break;
             case FRIENDS.PICCOLO:
+              friends.piccolo.x = Math.round(x);
+              friends.piccolo.y = Math.round(y);
               this.ctx.drawImage(
                 friends.piccolo.image,
                 0,
@@ -481,6 +628,8 @@ Game._drawLayer = function (layer) {
               // this.ctx.restore();
               break;
             case FRIENDS.BLUE_RANGER:
+              friends.blueRanger.x = Math.round(x);
+              friends.blueRanger.y = Math.round(y);
               this.ctx.drawImage(
                 friends.blueRanger.image,
                 friends.blueRanger.spriteX,
@@ -494,6 +643,8 @@ Game._drawLayer = function (layer) {
               );
               break;
             case FRIENDS.PINK_RANGER:
+              friends.pinkRanger.x = Math.round(x);
+              friends.pinkRanger.y = Math.round(y);
               this.ctx.drawImage(
                 friends.pinkRanger.image,
                 friends.pinkRanger.spriteX,
@@ -548,71 +699,20 @@ Game._drawLayer = function (layer) {
     }
 };
 
+
 Game.render = function () {
     let i = 1;
     this._drawLayer(0);
     this._drawLayer(1);
-    //draw hero
-    if(Game.hero.velX < 0){
-      if(Game.hero.walking === true){
-        if((Game.gameTime % 1) == .25){
-          if(i > 4){
-            i = 1;
-            i++;
-          }
-        }
-        this.ctx.drawImage(
-          this.hero.imageFlip,
-          Math.floor((Game.gameTime % .4) * 10) * this.hero.width,
-          0,
-          this.hero.width,
-          this.hero.height,
-          this.hero.screenX - this.hero.width / 2,
-          this.hero.screenY - this.hero.height / 2,
-          this.hero.width,
-          this.hero.height
-        );
-      }else{
-        this.ctx.drawImage(
-          this.hero.imageFlip,
-          this.hero.flipOffset,
-          0,
-          this.hero.width,
-          this.hero.height,
-          this.hero.screenX - this.hero.width / 2,
-          this.hero.screenY - this.hero.height / 2,
-          this.hero.width,
-          this.hero.height
-        );
-      }
-    }else {
-    if(this.hero.walking === true){
-        this.ctx.drawImage(
-          this.hero.image,
-          Math.floor((Game.gameTime % .4) * 10) * this.hero.width,
-          0,
-          this.hero.width,
-          this.hero.height,
-          this.hero.screenX - this.hero.width / 2,
-          this.hero.screenY - this.hero.height / 2,
-          this.hero.width,
-          this.hero.height
-        );
-      }else{
-        this.ctx.drawImage(
-          this.hero.image,
-          this.hero.standOffset,
-          0,
-          this.hero.width,
-          this.hero.height,
-          this.hero.screenX - this.hero.width / 2,
-          this.hero.screenY - this.hero.height / 2,
-          this.hero.width,
-          this.hero.height
-        );
-      }
-  }
+    this._drawHero();
     this._drawLayer(2);
+    this._displayUI();
+    this._displayFriendInteraction();
+    if(this.displayGameInfo === true){
+      this._displayGameInfo();
+    }else if(this.displayBackpack === true) {
+      this._displayBackpack();
+    }
 };
 
 
@@ -624,7 +724,8 @@ window.onload = function () {
   var gameStarted = false;
   var gameLoaded = localStorage.getItem('gameSave') || null;
   var canvas = document.getElementById('canvas');
-  canvas.addEventListener("click", Mouse.handleClick);
+  canvas.addEventListener("mousedown", Mouse.handleDown);
+  canvas.addEventListener("mousedown", Mouse.handleDown);
   canvas.width = CANVASWIDTH;
   canvas.height = CANVASHEIGHT;
   var context = canvas.getContext('2d');
