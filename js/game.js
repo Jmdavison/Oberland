@@ -372,6 +372,7 @@ Game.loadFriends = function() {
     this.map.friends.piccolo.image = Loader.getImage('piccolo');
     this.map.friends.blueRanger.image = Loader.getImage('blue-ranger');
     this.map.friends.pinkRanger.image = Loader.getImage('pink-ranger');
+    this.map.friends.link.image = Loader.getImage('link');
 };
 
 //calls async loading of image assets (resolves on load)
@@ -383,6 +384,7 @@ Game.load = function () {
         Loader.loadImage('frieza', './images/frieza.png'),
         Loader.loadImage('blue-ranger', './images/blue-ranger.png'),
         Loader.loadImage('pink-ranger', './images/pink-ranger.png'),
+        Loader.loadImage('link', './images/link-nu.png'),
         Loader.loadImage('house', './images/house.png'),
         Loader.loadImage('tiles', './images/tiles.png'),
         Loader.loadImage('items', './images/items.png'),
@@ -587,13 +589,13 @@ Game._displayFriendInteraction = function(){
     var friend = this.friendInteraction[0]
     this.ctx.save();
       this.ctx.fillStyle = "#BDA26E";
-      this.ctx.fillRect(friend.x-100,friend.y-75, 200, 50);
+      this.ctx.fillRect(friend.x-100,friend.y-(friend.sourceHeight*1.4), 200, 50);
       this.ctx.strokeStyle = "#1C1200";
       this.ctx.lineWidth = 2;
-      this.ctx.strokeRect(friend.x-100,friend.y-75, 200 , 50);
+      this.ctx.strokeRect(friend.x-100,friend.y-(friend.sourceHeight*1.4), 200 , 50);
       this.ctx.fillStyle = "#1C1200";
       this.ctx.font="18px PixelType";
-      wrapText(this.ctx,friend.convo[friend.currentConvo],friend.x-93,friend.y-60,190,10);
+      wrapText(this.ctx,friend.convo[friend.currentConvo],friend.x-93,friend.y-(friend.sourceHeight*1.2),190,10);
     this.ctx.restore();
     if(since > 1 ){
       this.friendInteraction = null;
@@ -625,12 +627,6 @@ Game._drawHero = function(){
     //draw hero
     if(Game.hero.velX < 0){
       if(Game.hero.walking === true){
-        if((Game.gameTime % 1) == .25){
-          if(i > 4){
-            i = 1;
-            i++;
-          }
-        }
         this.ctx.drawImage(
           this.hero.imageFlip,
           Math.floor((Game.gameTime % .4) * 10) * this.hero.width,
@@ -684,6 +680,22 @@ Game._drawHero = function(){
     }
   };
 
+Game._drawFriend = function(friend,x,y){
+  friend.x = x;
+  friend.y = y;
+      this.ctx.drawImage(
+        friend.image,
+        friend.spriteX,
+        friend.spriteY,
+        friend.sourceWidth,
+        friend.sourceHeight,
+        x - friend.sourceWidth/4,
+        y - friend.sourceHeight/2,
+        friend.sourceWidth,
+        friend.sourceHeight
+      );
+};
+
 Game._drawMap = function () {
     this.map.layers.forEach(function (layer, index) {
         this._drawLayer(index);
@@ -709,94 +721,30 @@ Game._drawLayer = function (layer) {
             var x = (c - startCol) * this.map.tSize + offsetX;
             var y = (r - startRow) * this.map.tSize + offsetY;
             var friends = this.map.friends;
-            switch(tile){
-              case HOUSE:
-                this.ctx.drawImage(
-                  this.houseSprite,
-                  0,
-                  0,
-                  77,
-                  115,
-                  Math.round(x) - 20,
-                  Math.round(y) - 40,
-                  77,
-                  115
-                );
-                this.ctx.save();
-                this.ctx.strokeStyle = "green";
-                this.ctx.beginPath();
-                this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-                this.ctx.stroke();
-                this.ctx.restore();
-                break;
-              case FRIENDS.FRIEZA:
-                friends.frieza.x = Math.round(x);
-                friends.frieza.y = Math.round(y);
-                this.ctx.drawImage(
-                  friends.frieza.image,
-                  0,
-                  0,
-                  96,
-                  96,
-                  Math.round(x) - 20,
-                  Math.round(y) - 20,
-                  84,
-                  84
-                );
-                break;
-            case FRIENDS.PICCOLO:
-              friends.piccolo.x = Math.round(x);
-              friends.piccolo.y = Math.round(y);
+          //  console.log(tile);
+            if(tile === HOUSE){
               this.ctx.drawImage(
-                friends.piccolo.image,
-                0,
-                friends.piccolo.spriteY,
-                friends.piccolo.sourceWidth,
-                friends.piccolo.sourceHeight,
-                Math.round(x) - 12,
-                Math.round(y) - 14,
-                55,
-                55
-              );
-              // this.ctx.save();
-              // this.ctx.strokeStyle = "green";
-              // this.ctx.beginPath();
-              // this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
-              // this.ctx.stroke();
-              // this.ctx.restore();
-              break;
-            case FRIENDS.BLUE_RANGER:
-              friends.blueRanger.x = Math.round(x);
-              friends.blueRanger.y = Math.round(y);
-              this.ctx.drawImage(
-                friends.blueRanger.image,
-                friends.blueRanger.spriteX,
-                friends.blueRanger.spriteY,
-                friends.blueRanger.sourceWidth,
-                friends.blueRanger.sourceHeight,
-                Math.round(x),
-                Math.round(y) - 10,
-                friends.blueRanger.sourceWidth * .8,
-                friends.blueRanger.sourceHeight * .8
-              );
-              break;
-            case FRIENDS.PINK_RANGER:
-              friends.pinkRanger.x = Math.round(x);
-              friends.pinkRanger.y = Math.round(y);
-              this.ctx.drawImage(
-                friends.pinkRanger.image,
-                friends.pinkRanger.spriteX,
-                friends.pinkRanger.spriteY,
-                friends.pinkRanger.sourceWidth,
-                friends.pinkRanger.sourceHeight,
-                Math.round(x + 2),
-                Math.round(y - 14),
-                this.map.friends.pinkRanger.sourceWidth * .8,
-                this.map.friends.pinkRanger.sourceHeight * .8
-              );
-              break;
-            default: // 0 => empty tile
-                if(tile >= 1000){
+                   this.houseSprite,
+                   0,
+                   0,
+                   77,
+                   115,
+                   Math.round(x) - 20,
+                   Math.round(y) - 40,
+                   77,
+                   115
+                 );
+                 this.ctx.save();
+                 this.ctx.strokeStyle = "green";
+                 this.ctx.beginPath();
+                 this.ctx.arc(x+18, y+15, 58, 0, Math.PI*2);
+                 this.ctx.stroke();
+                 this.ctx.restore();
+              }else if(tile >= 100 && tile < 1000){
+                var friend = this.map.getFriend(tile);
+              //  console.log(friend);
+                this._drawFriend(friend, Math.floor(x),Math.floor(y));
+            }else if(tile >= 1000){
                   //console.log(tile);
                     var item = this.map.getItem(tile);
                   //  console.log(item);
@@ -812,31 +760,29 @@ Game._drawLayer = function (layer) {
                       18
                     );
                 }else{
-                  this.ctx.drawImage(
-                      this.tileSet, // image
-                      (tile - 1) * this.map.tSize, // source x
-                      0, // source y
-                      this.map.tSize, // source width
-                      this.map.tSize, // source height
-                      Math.round(x),  // target x
-                      Math.round(y), // target y
-                      this.map.tSize, // target width
-                      this.map.tSize // target height
-                  );
-                }
-                //DISPLAYS GRID FOR DEBUGGING & INTERACTION ZONES
-                // this.ctx.save();
-                // this.ctx.strokeStyle = "green";
-                // this.ctx.beginPath();
-                // this.ctx.arc(x, y, 1, 0, Math.PI*2);
-                // this.ctx.stroke();
-                // this.ctx.restore();
-                break;
-            }
-        }
-    }
-};
+                    this.ctx.drawImage(
+                        this.tileSet, // image
+                        (tile - 1) * this.map.tSize, // source x
+                        0, // source y
+                        this.map.tSize, // source width
+                        this.map.tSize, // source height
+                        Math.round(x),  // target x
+                        Math.round(y), // target y
+                        this.map.tSize, // target width
+                        this.map.tSize // target height
+                    );
+                  }
 
+                    //  DISPLAYS GRID FOR DEBUGGING & INTERACTION ZONES
+                      // this.ctx.save();
+                      // this.ctx.strokeStyle = "green";
+                      // this.ctx.beginPath();
+                      // this.ctx.arc(x, y, 1, 0, Math.PI*2);
+                      // this.ctx.stroke();
+                      // this.ctx.restore()
+                }
+              }
+            };
 
 Game.render = function () {
     let i = 1;
@@ -853,7 +799,6 @@ Game.render = function () {
     }
 };
 
-
 //
 // start up functions
 //
@@ -867,7 +812,8 @@ window.onload = function () {
   Game.controls = document.querySelector('.controls');
   changeColors(canvas);
   canvas.addEventListener("mousedown", Mouse.handleDown);
-  canvas.addEventListener("mousedown", Mouse.handleDown);
+  canvas.addEventListener("mouseup", Mouse.handleUp);
+  canvas.addEventListener("mousemove", Mouse.handleMove);
   canvas.width = CANVASWIDTH;
   canvas.height = CANVASHEIGHT;
   var context = canvas.getContext('2d');

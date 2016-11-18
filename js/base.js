@@ -1,7 +1,7 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 72;
-const MAPROWS = 256;
+const MAPCOLS = 64;
+const MAPROWS = 144;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
 
@@ -25,7 +25,8 @@ var FRIENDS = {
                FRIEZA: 101,
                PICCOLO: 102,
                BLUE_RANGER: 103,
-               PINK_RANGER: 104
+               PINK_RANGER: 104,
+               LINK: 105
              };
 
 //background objects
@@ -110,7 +111,7 @@ var Mouse = {};
 Mouse.click = {
   x: -1,
   y: -1,
-  arrived: false,
+  arrived: true,
 }
 
 //click handler
@@ -127,7 +128,7 @@ Mouse.handleDown = function(e) {
          (event.offsetY <= (button.y + button.height))
        ){button.action();}
     }
-  }else if (Game.inCharacterSelect) {
+    }else if (Game.inCharacterSelect) {
     for(var i=0; i < Game.characterSelect.buttons.length; i++){
       var button = Game.characterSelect.buttons[i];
       if(
@@ -138,8 +139,6 @@ Mouse.handleDown = function(e) {
        ){button.action();}
     }
   }else if(Game.inGame){
-    event.preventDefault();
-    Mouse.down = true;
     if(Game.displayBackpack === true){
      var x = event.offsetX;
      var y = event.offsetY;
@@ -151,6 +150,7 @@ Mouse.handleDown = function(e) {
          Game.selectedItem = item;
        }
    }else{
+     Mouse.down = true;
      Mouse.click.arrived = false;
      Game.hero.walking = true;
      var destX = event.offsetX + Game.camera.x;
@@ -159,6 +159,7 @@ Mouse.handleDown = function(e) {
      Mouse.click.y = destY;
     }
   }else{
+    Mouse.down = true;
     Mouse.click.arrived = false;
     Game.hero.walking = true;
     var destX = event.offsetX + Game.camera.x;
@@ -170,13 +171,25 @@ Mouse.handleDown = function(e) {
 };
 
 Mouse.handleUp = function(e){
-  Mouse.down = false;
-  console.console.log('up');
+  if(Mouse.down === true){
+    Mouse.down = false;
+  }
 }
+
+Mouse.handleMove =  function(e){
+  if(Mouse.down === true && Mouse.click.x != -1){
+    Mouse.click.arrived = false;
+    Game.hero.walking = true;
+    var destX = e.offsetX + Game.camera.x;
+    var destY = e.offsetY + Game.camera.y;
+    Mouse.click.x = destX;
+    Mouse.click.y = destY;
+  }
+};
 
 Mouse.currentDest = function (){
 //    console.log(this.click.arrived);
-    if(Mouse.down == true || this.click.arrived == false && this.click.x !== -1){
+    if(Mouse.click.arrived === false){
       return true;
     }else return false;
-  }
+  };
