@@ -90,6 +90,17 @@ function Hero(heroNum,map, x, y, inv) {
     this.imageFlip = Loader.getImage('hero'+heroNum+'-flip');
 
     this.inventory = inv || [];
+    this.invTileWidth = 0;
+    this.invTileHeight = 0;
+
+    this.getItemFromInv = function(col,row){
+      for(var i = 0; i < this.inventory.length; i++){
+        if((this.inventory[i].col == col) && (this.inventory[i].row == row)){
+          return this.inventory[i];
+        }
+      }
+      return -1;
+    }
 }
 
 Hero.SPEED = 200; // pixels per second
@@ -387,6 +398,7 @@ Game.init = function (save) {
     this.displayBackpack = false;
     this.displayGameInfo = false;
     this.friendInteraction = null;
+    this.selectedItem = null;
     this.uiStream = [];
     Keyboard.listenForEvents([Keyboard.Q,Keyboard.ESC]);
     this.map = new Map();
@@ -439,13 +451,125 @@ Game.update = function (delta) {
 };
 
 Game._displayGameInfo = function(){
-    this.ctx.fillRect(100,100,CANVASWIDTH-200,CANVASHEIGHT-200);
-    this.ctx.fillText("GAME INFO", 200, 200);
+    var height  = CANVASHEIGHT-200;
+    var width   = CANVASWIDTH -200;
+    this.ctx.save();
+    this.ctx.fillStyle = "#d1c27f";
+    this.ctx.fillRect(100,100,width,height);
+    this.ctx.strokeStyle = "#16150e";
+    this.ctx.lineWidth = 5;
+    this.ctx.strokeRect(100,100,width,height);
+    this.ctx.fillStyle="#16150e";
+    this.ctx.font="22px PixelType";
+    var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood. Just like you always do. \n\n Collect items and bring them to those who you know best. then when you're ready, return home for the night.";
+    wrapText(this.ctx,text,110,125,width-5,15);
+    var text = "During the day, you will find need to defend your house from the endless waves of normies. Position the friends that you've unlocked and theyll attack each visitor that approaches.";
+    wrapText(this.ctx,text,110,230,width -5,15);
+    var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purpases only.";
+    this.ctx.font = "12x PixelType";
+    wrapText(this.ctx,text,110,height+50,width -5,15);
+    this.ctx.restore();
 };
 
 Game._displayBackpack = function(){
-    this.ctx.fillRect(100,100,CANVASWIDTH-200,CANVASHEIGHT-200);
-    this.ctx.fillText("BACKPACK", 200, 200);
+    var height  = CANVASHEIGHT-200;
+    var width   = CANVASWIDTH -200;
+    this.ctx.save();
+    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+    this.ctx.font = "30px PixelType";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText(
+      "INVENTORY",
+      CANVASWIDTH/2,
+      90
+    );
+    this.ctx.fillStyle = "#4c3606";
+    this.ctx.fillRect(100,100,width,height);
+    this.ctx.strokeStyle = "#16150e";
+    this.ctx.lineWidth = 5;
+    this.ctx.strokeRect(100,100,width,height);
+    this.ctx.restore();
+    var cols = 4;
+    itemWidth = (width - 10) / cols;
+    itemHeight = (height - 10) / cols;
+    this.hero.invTileWidth = itemWidth;
+    this.hero.invTileHeight = itemHeight;
+    var inv = this.hero.inventory;
+    var rows = Math.ceil(inv.length / cols);
+    var color = "rgb(242, 214, 155, .8)";
+    this.ctx.strokeStyle = color;
+    var rowCount = 0;
+    for(var i = 0; i < inv.length; i++){
+          var colCount = i % (cols);
+          if(i % cols == 0 && i != 0){rowCount++;}
+          this.hero.inventory[i].col = colCount;
+          this.hero.inventory[i].row = rowCount;
+          if(inv[i] == this.selectedItem || (this.selectedItem == false && i == 0)){
+            this.selectedItem = inv[i];
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = 1;
+          }
+          else{
+            this.ctx.strokeStyle = "black";
+            this.ctx.lineWidth = 1;}
+          this.ctx.strokeRect(105+(colCount*itemWidth), 105+(rowCount*itemHeight), itemWidth-2, itemHeight-2);
+          this.ctx.fillStyle = color;
+          this.ctx.drawImage(
+            this.map.itemsImage,
+             inv[i].spriteIndex,
+             0,
+             this.map.itemsWidth,
+             this.map.itemsWidth,
+             105+(colCount*itemWidth)+10,
+             105+(rowCount*itemHeight)+10,
+             itemWidth/2,
+             itemHeight/2
+           );
+        this.ctx.font = "16px PixelType";
+        this.ctx.fillStyle = "white";
+        wrapText(
+          this.ctx,
+          inv[i].name + " x " + inv[i].numberOwned,
+          105+(colCount*itemWidth)+3,
+          105+(rowCount*itemHeight)+itemHeight-18,
+          itemWidth - 4,
+          10
+        );
+    }
+    if(this.selectedItem != null){
+      this.ctx.strokeStyle = "white";
+      this.ctx.lineWidth = 3;
+      this.ctx.strokeRect(105,height+30,width-10,70);
+      this.ctx.drawImage(
+        this.map.itemsImage,
+        this.selectedItem.spriteIndex,
+        0,
+        this.map.itemsWidth,
+        this.map.itemsWidth,
+        110,
+        height+30,
+        itemWidth/2,
+        itemHeight/2
+      );
+      wrapText(
+        this.ctx,
+        this.selectedItem.name,
+        110,
+        height+80,
+        itemWidth - 4,
+        10
+      );
+      this.ctx.font = "24px PixelType";
+      wrapText(
+        this.ctx,
+        this.selectedItem.comment,
+        110+itemWidth+15,
+        height+60,
+        width - itemWidth*2,
+        15
+      );
+    }
 };
 
 Game._displayFriendInteraction = function(){
@@ -453,28 +577,29 @@ Game._displayFriendInteraction = function(){
     var since = this.gameTime - this.friendInteraction[1];
     var friend = this.friendInteraction[0]
     this.ctx.save();
-      this.ctx.fillStyle = "#BDA26E;"
-      var txtWidth = this.ctx.measureText(friend.convo[friend.convoIndex]);
-      this.ctx.fillRect(friend.x-25,friend.y-15, txtWidth + 15, 50);
+      this.ctx.fillStyle = "#BDA26E";
+      this.ctx.fillRect(friend.x-100,friend.y-75, 200, 50);
       this.ctx.strokeStyle = "#1C1200";
-      this.ctx.lineWidth = 3;
-      this.ctx.strokeRect(friend.x-25,friend.y-15, txtWidth + 15, 50);
-      this.ctx.fillStyle="30px PixelType";
-      this.ctx.fillText(friend.convo[friend.currentConvo],friend.x-25,friend.y-15);
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeRect(friend.x-100,friend.y-75, 200 , 50);
+      this.ctx.fillStyle = "#1C1200";
+      this.ctx.font="18px PixelType";
+      wrapText(this.ctx,friend.convo[friend.currentConvo],friend.x-93,friend.y-60,200,10);
     this.ctx.restore();
-    if(since > 5 ){
+    if(since > 1 ){
       this.friendInteraction = null;
     }
   }
 };
 
 Game._displayUI = function(){
-    this.ctx.fillStyle = "28px PixelType";
-    this.ctx.strokeStyle = "white";
+    this.ctx.font = "24px PixelType";
+    this.ctx.strokeStyle = "#BC4E48";
     if(this.uiStream.length > 0){
       for(var i = 0; i < this.uiStream.length; i++){
         var timeSince = this.gameTime - this.uiStream[i][1];
         //console.log(timeSince);
+        this.ctx.strokeText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-50)-(i*5)+(10*timeSince)));
         this.ctx.fillText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-50)-(i*5)+(10*timeSince)));
         if(timeSince > 10){
         this.uiStream.shift();

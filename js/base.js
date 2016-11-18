@@ -1,7 +1,7 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 64;
-const MAPROWS = 64;
+const MAPCOLS = 72;
+const MAPROWS = 256;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
 
@@ -115,7 +115,6 @@ Mouse.click = {
 
 //click handler
 Mouse.handleDown = function(e) {
-  console.log("down");
   var event =  window.event || e;
   if(Game.inStartMenu){
     for(var i=0; i < Game.startMenu.buttons.length; i++){
@@ -140,13 +139,28 @@ Mouse.handleDown = function(e) {
   }else{
     event.preventDefault();
     Mouse.down = true;
-    Mouse.click.arrived = false;
-    Game.hero.walking = true;
-    var destX = event.offsetX + Game.camera.x;
-    var destY = event.offsetY + Game.camera.y;
+    if(Game.displayBackpack === true){
+     console.log("inside");
+     var x = event.offsetX;
+     var y = event.offsetY;
+     console.log(x);
+     if((x> 100 && x < CANVASWIDTH - 100) && (y > 100 && y < CANVASHEIGHT - 200)){
+       var col = Math.floor((x-100)/Game.hero.invTileWidth);
+       var row = Math.floor((y-100)/Game.hero.invTileHeight);
+       if(row < 3){
+         var item = Game.hero.getItemFromInv(col,row);
+         Game.selectedItem = item;
+       }
+     }
+   }else{
+        Mouse.click.arrived = false;
+        Game.hero.walking = true;
+        var destX = event.offsetX + Game.camera.x;
+        var destY = event.offsetY + Game.camera.y;
 
-    Mouse.click.x = destX;
-    Mouse.click.y = destY;
+        Mouse.click.x = destX;
+        Mouse.click.y = destY;
+    }
   }
 }
 

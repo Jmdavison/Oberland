@@ -1,3 +1,22 @@
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+  var words = text.split(' ');
+  var line = '';
+
+  for(var n = 0; n < words.length; n++) {
+    var testLine = line + words[n] + ' ';
+    var metrics = context.measureText(testLine);
+    var testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      context.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    }
+    else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, y);
+}
 
 
 //really nice little snippet gotten from Stackoverflow
@@ -226,7 +245,7 @@ function Map() {
               image: null,
               currentConvo: 0,
               quest: null,
-              convo: ["Hello there, I'm here to help! \n Bring me !num !questItem \n and I'll make it worth your while.",
+              convo: ["Hello there, I'm here to help! \n Bring me !num !questItems \n and I'll make it worth your while.",
                       "Ahh, I see you have the gems, Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 34,
@@ -245,7 +264,7 @@ function Map() {
               currentConvo: 0,
               image: null,
               quest: null,
-              convo: ["Hello there, I'm here to help! \n Bring me !num !questItem \n and I'll make it worth your while.",
+              convo: ["Hello there, I'm here to help! \n Bring me !num !questItems \n and I'll make it worth your while.",
                       "Ahh, I see you have the items, \n Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 35,
@@ -265,7 +284,7 @@ function Map() {
               currentConvo: 0,
               image: null,
               quest: null,
-              convo: ["Hello peasant, I am FRIEZA. Bring \n  me !num !questItem and I will \n defend the little shack you call home.",
+              convo: ["Hello peasant, I am FRIEZA. Bring me !num !questItems and I will defend the little shack you call home.",
                       "Ahh, I see you have the gems, Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 96,
@@ -283,7 +302,7 @@ function Map() {
               currentConvo: 0,
               image: null,
               quest: null,
-              convo: ["Hello traveler, I am piccolo. \n Bring me !num !questItem and I will keep \n you safe from your\n enemies.",
+              convo: ["Hello traveler, I am piccolo. \n Bring me !num !questItems and I will keep \n you safe from your\n enemies.",
                       "Ahh, I see you have the gems, \n  Would you like me to join your team?",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 74,
