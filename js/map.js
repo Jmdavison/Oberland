@@ -1,3 +1,25 @@
+//Random color generators that generate specific ranges.
+function getRandomBgColor() {
+    var r = Math.floor((Math.random() * (40-30+1))+30);
+    var g = Math.floor((Math.random() * (70-30+1))+30);
+    var b = Math.floor((Math.random() * (70-60+1))+60);
+    var color = 'rgb('+r+','+g+','+b+')';
+    return color;
+}
+function getRandomFgColor() {
+    var r = Math.floor((Math.random() * (50-30+1))+50);
+    var g = Math.floor((Math.random() * (198-140+1))+140);
+    var b = g - Math.floor((Math.random() * (40-30+1)));
+    var color = 'rgb('+r+','+g+','+b+')';
+    return color;
+}
+
+function changeColors(canvas){
+  document.body.style.backgroundColor = getRandomBgColor();
+  canvas.style.backgroundColor = getRandomFgColor();
+}
+//a function that wraps text inside a width at a specified location
+//gotten from stackoverflow.com
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
   var words = text.split(' ');
   var line = '';
@@ -189,7 +211,7 @@ function Map() {
     bigPill: {
       index: ITEMS.bigPill,
       name: "big pill",
-      comment: "you're gonna need some water",
+      comment: "it hurts to swallow...",
       spriteIndex:145,
       rarity:3,
       numPlaced:0,

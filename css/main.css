@@ -5,11 +5,21 @@
 
 
 html,body,ul,li,h1,h2,h3,h4,p{margin:0; padding:0;}
+.loading{
+  position:absolute;
+  top:270px;
+  left:39%;
+  font-size:5.5em;
+  color:#29304c;
+}
 .wrapper{width:100%;}
-body,.wrapper,canvas{font-family: 'PixelType'}
+.controls,.welcome{color:white;text-align: center;position:relative;}
+.welcome{top:10px; font-size:2em;}
+.controls{top:18px;height:15px;visibility:hidden;line-height:1;font-size:1.2em;}
+body,.wrapper,canvas,.loading,.controls,.welcome{font-family: 'PixelType'}
 body,canvas{transition: background-color 2s ease;}
 body.day{background-color:#8cc6ef;}
-canvas.day{background-color:##97e470;}
+canvas.day{background-color:#97e470;}
 body.night{background-color:#241b2f;}
 canvas.night{background-color:#7599da;}
 #canvas{

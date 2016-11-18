@@ -136,33 +136,37 @@ Mouse.handleDown = function(e) {
          (event.offsetY <= (button.y + button.height))
        ){button.action();}
     }
-  }else{
+  }else if(Game.inGame){
     event.preventDefault();
     Mouse.down = true;
     if(Game.displayBackpack === true){
-     console.log("inside");
      var x = event.offsetX;
      var y = event.offsetY;
-     console.log(x);
      if((x> 100 && x < CANVASWIDTH - 100) && (y > 100 && y < CANVASHEIGHT - 200)){
        var col = Math.floor((x-100)/Game.hero.invTileWidth);
        var row = Math.floor((y-100)/Game.hero.invTileHeight);
-       if(row < 3){
-         var item = Game.hero.getItemFromInv(col,row);
+       var item = Game.hero.getItemFromInv(col,row);
+       if(item != -1){
          Game.selectedItem = item;
        }
-     }
    }else{
-        Mouse.click.arrived = false;
-        Game.hero.walking = true;
-        var destX = event.offsetX + Game.camera.x;
-        var destY = event.offsetY + Game.camera.y;
-
-        Mouse.click.x = destX;
-        Mouse.click.y = destY;
+     Mouse.click.arrived = false;
+     Game.hero.walking = true;
+     var destX = event.offsetX + Game.camera.x;
+     var destY = event.offsetY + Game.camera.y;
+     Mouse.click.x = destX;
+     Mouse.click.y = destY;
     }
+  }else{
+    Mouse.click.arrived = false;
+    Game.hero.walking = true;
+    var destX = event.offsetX + Game.camera.x;
+    var destY = event.offsetY + Game.camera.y;
+    Mouse.click.x = destX;
+    Mouse.click.y = destY;
   }
-}
+  }
+};
 
 Mouse.handleUp = function(e){
   Mouse.down = false;

@@ -17,7 +17,7 @@ function Camera(map, width, height) {
     this.maxY = map.rows * map.tSize - height;
 }
 
-Camera.SPEED = 256; // pixels per second
+Camera.SPEED = 100; // pixels per second
 
 
 //camera prototype methods, this prototype call allows us to attach these methods
@@ -103,7 +103,7 @@ function Hero(heroNum,map, x, y, inv) {
     }
 }
 
-Hero.SPEED = 200; // pixels per second
+Hero.SPEED = 220; // pixels per second
 
 Hero.prototype.move = function (delta, destX, destY) {
     // move hero
@@ -159,6 +159,7 @@ var Game = {};
 
 //passing save object to init and starting loop
 Game.startFromSave = function(save) {
+    this.inGame = true;
     this.elapsed = 0;
     this.gameTime = save.gameTime;
     this.saved = false;
@@ -167,6 +168,7 @@ Game.startFromSave = function(save) {
 };
 
 Game.startNew = function() {
+    this.inGame = true;
     this.elapsed = 0;
     this.gameTime = 0;
     this.saved = false;
@@ -243,6 +245,7 @@ Game.startMenu = function(context, canvas) {
         "#fff",
         function(){
           Game.inStartMenu = false;
+          Game.inCharacterSelect = false;
           Game.startFromSave(Game.save);
         }
       ));
@@ -395,6 +398,7 @@ Game.load = function () {
 
 //initialization function
 Game.init = function (save) {
+    this.controls.style.visibility = 'initial';
     this.displayBackpack = false;
     this.displayGameInfo = false;
     this.friendInteraction = null;
@@ -411,6 +415,7 @@ Game.init = function (save) {
     }else{
       this.hero = new Hero(Game.heroSelected,this.map, (MAPCOLS*TILESIZE)/2, (MAPROWS*TILESIZE) - 150);
       this.camera = new Camera(this.map, 512, 512);
+      this.map.loadQuests(this.map);
     }
     this.map.itemsImage = Loader.getImage('items');
     this.loadFriends();
@@ -454,26 +459,30 @@ Game._displayGameInfo = function(){
     var height  = CANVASHEIGHT-200;
     var width   = CANVASWIDTH -200;
     this.ctx.save();
-    this.ctx.fillStyle = "#d1c27f";
-    this.ctx.fillRect(100,100,width,height);
-    this.ctx.strokeStyle = "#16150e";
-    this.ctx.lineWidth = 5;
-    this.ctx.strokeRect(100,100,width,height);
-    this.ctx.fillStyle="#16150e";
-    this.ctx.font="22px PixelType";
-    var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood. Just like you always do. \n\n Collect items and bring them to those who you know best. then when you're ready, return home for the night.";
-    wrapText(this.ctx,text,110,125,width-5,15);
-    var text = "During the day, you will find need to defend your house from the endless waves of normies. Position the friends that you've unlocked and theyll attack each visitor that approaches.";
-    wrapText(this.ctx,text,110,230,width -5,15);
-    var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purpases only.";
-    this.ctx.font = "12x PixelType";
-    wrapText(this.ctx,text,110,height+50,width -5,15);
+      this.ctx.fillStyle = "#d1c27f";
+      this.ctx.fillRect(100,100,width,height);
+      this.ctx.strokeStyle = "#16150e";
+      this.ctx.lineWidth = 5;
+      this.ctx.strokeRect(100,100,width,height);
+      this.ctx.fillStyle="#16150e";
+      this.ctx.font="22px PixelType";
+      var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood. Just like you always do. \n\n Collect items and bring them to those who you know best. then when you're ready, return home for the night.";
+      // wrapText(this.ctx,text,110,125,width-5,15);
+      // var text = "During the day, you will find need to defend your house from the endless waves of normies. Position the friends that you've unlocked and theyll attack each visitor that approaches.";
+      wrapText(this.ctx,text,110,230,width -5,15);
+      var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purpases only.";
+      this.ctx.font = "12x PixelType";
+      wrapText(this.ctx,text,110,height+50,width -5,15);
     this.ctx.restore();
 };
 
 Game._displayBackpack = function(){
     var height  = CANVASHEIGHT-200;
     var width   = CANVASWIDTH -200;
+    var cols = 4;
+    itemWidth = (width - 10) / cols;
+    itemHeight = (height - 10) / cols;
+
     this.ctx.save();
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
@@ -484,15 +493,13 @@ Game._displayBackpack = function(){
       CANVASWIDTH/2,
       90
     );
+    this.ctx.restore();
+    this.ctx.save();
     this.ctx.fillStyle = "#4c3606";
     this.ctx.fillRect(100,100,width,height);
     this.ctx.strokeStyle = "#16150e";
     this.ctx.lineWidth = 5;
     this.ctx.strokeRect(100,100,width,height);
-    this.ctx.restore();
-    var cols = 4;
-    itemWidth = (width - 10) / cols;
-    itemHeight = (height - 10) / cols;
     this.hero.invTileWidth = itemWidth;
     this.hero.invTileHeight = itemHeight;
     var inv = this.hero.inventory;
@@ -570,6 +577,7 @@ Game._displayBackpack = function(){
         15
       );
     }
+    this.ctx.restore();
 };
 
 Game._displayFriendInteraction = function(){
@@ -584,7 +592,7 @@ Game._displayFriendInteraction = function(){
       this.ctx.strokeRect(friend.x-100,friend.y-75, 200 , 50);
       this.ctx.fillStyle = "#1C1200";
       this.ctx.font="18px PixelType";
-      wrapText(this.ctx,friend.convo[friend.currentConvo],friend.x-93,friend.y-60,200,10);
+      wrapText(this.ctx,friend.convo[friend.currentConvo],friend.x-93,friend.y-60,190,10);
     this.ctx.restore();
     if(since > 1 ){
       this.friendInteraction = null;
@@ -593,19 +601,23 @@ Game._displayFriendInteraction = function(){
 };
 
 Game._displayUI = function(){
+    this.ctx.save();
+    this.ctx.fillStyle = "white";
     this.ctx.font = "24px PixelType";
     this.ctx.strokeStyle = "#BC4E48";
     if(this.uiStream.length > 0){
       for(var i = 0; i < this.uiStream.length; i++){
         var timeSince = this.gameTime - this.uiStream[i][1];
         //console.log(timeSince);
-        this.ctx.strokeText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-50)-(i*5)+(10*timeSince)));
-        this.ctx.fillText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-50)-(i*5)+(10*timeSince)));
-        if(timeSince > 10){
+        this.ctx.strokeText(this.uiStream[i][0].notif,5,(CANVASHEIGHT-10)-(i*15));
+        this.ctx.fillText(this.uiStream[i][0].notif,5,((CANVASHEIGHT-10)-(i*15)));
+
+        if(timeSince > 4){
         this.uiStream.shift();
         }
       }
     }
+    this.ctx.restore();
 };
 
 Game._drawHero = function(){
@@ -849,6 +861,10 @@ window.onload = function () {
   var gameStarted = false;
   var gameLoaded = localStorage.getItem('gameSave') || null;
   var canvas = document.getElementById('canvas');
+  var wrapper = document.querySelector('.wrapper');
+  var loading = document.querySelector('.loading');
+  Game.controls = document.querySelector('.controls');
+  changeColors(canvas);
   canvas.addEventListener("mousedown", Mouse.handleDown);
   canvas.addEventListener("mousedown", Mouse.handleDown);
   canvas.width = CANVASWIDTH;
@@ -863,6 +879,7 @@ window.onload = function () {
   //if all internal promises get resolved, and rejects if any
   //promises reject
   Promise.all(promises).then(function (loaded) {
+      this.wrapper.removeChild(loading);
       //initialize once images are loaded
       Game.startMenu(context, canvas);
   }.bind(this));
