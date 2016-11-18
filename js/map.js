@@ -384,24 +384,26 @@ function Map() {
         }
       };
   this.availableQuests = [];
-  this.getQuest = function(){
-    var rand = Math.floor(Math.random()*this.availableQuests.length + 1);
-    var quest = this.availableQuests[rand];
-    this.availableQuests.splice(rand,1);
+  this.getQuest = function(map){
+    var rand = Math.floor(Math.random()*map.availableQuests.length);
+    console.log(rand);
+    var quest = map.availableQuests[rand];
+    map.availableQuests.splice(rand,1);
     return quest;
-  }
-  this.loadQuests = function(){
-    for (var x in this.items){
-      this.availableQuests.push({
-        itemName: this.items[x].name,
-        numRequired: this.items[x].numPlaced - Math.floor(this.items[x].numPlaced/4)
+  };
+  this.loadQuests = function(map){
+    for (var x in map.items){
+      console.log("push");
+      map.availableQuests.push({
+        itemName: map.items[x].name,
+        numRequired: map.items[x].numPlaced - Math.floor(map.items[x].numPlaced/4)
       });
     }
-    for(var x in this.friends){
-      this.friends[x].quest = this.getQuest();
-      this.friends[x].convo[0] = this.friends[x].convo[0].replace(/!questItem/g, this.friends[x].quest.itemName);
-      this.friends[x].convo[0] = this.friends[x].convo[0].replace(/!num/g, this.friends[x].quest.numRequired);
+    for(var x in map.friends){
+      map.friends[x].quest = map.getQuest(map);
+      console.log(map.friends[x]);
+      map.friends[x].convo[0] = map.friends[x].convo[0].replace(/!questItem/g, map.friends[x].quest.itemName);
+      map.friends[x].convo[0] = map.friends[x].convo[0].replace(/!num/g, map.friends[x].quest.numRequired);
     }
   };
-  this.loadQuests();
 }
