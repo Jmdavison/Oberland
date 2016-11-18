@@ -116,6 +116,7 @@ Mouse.click = {
 //click handler
 Mouse.handleDown = function(e) {
   var event =  window.event || e;
+  event.preventDefault();
   if(Game.inStartMenu){
     for(var i=0; i < Game.startMenu.buttons.length; i++){
       var button = Game.startMenu.buttons[i];

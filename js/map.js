@@ -211,7 +211,7 @@ function Map() {
     bigPill: {
       index: ITEMS.bigPill,
       name: "big pill",
-      comment: "it hurts to swallow...",
+      comment: "that'll hurt to swallow",
       spriteIndex:145,
       rarity:3,
       numPlaced:0,

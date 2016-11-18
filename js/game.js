@@ -459,6 +459,7 @@ Game._displayGameInfo = function(){
     var height  = CANVASHEIGHT-200;
     var width   = CANVASWIDTH -200;
     this.ctx.save();
+
       this.ctx.fillStyle = "#d1c27f";
       this.ctx.fillRect(100,100,width,height);
       this.ctx.strokeStyle = "#16150e";
@@ -467,11 +468,11 @@ Game._displayGameInfo = function(){
       this.ctx.fillStyle="#16150e";
       this.ctx.font="22px PixelType";
       var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood. Just like you always do. \n\n Collect items and bring them to those who you know best. then when you're ready, return home for the night.";
-      // wrapText(this.ctx,text,110,125,width-5,15);
+       wrapText(this.ctx,text,110,125,width-5,15);
       // var text = "During the day, you will find need to defend your house from the endless waves of normies. Position the friends that you've unlocked and theyll attack each visitor that approaches.";
-      wrapText(this.ctx,text,110,230,width -5,15);
+      //wrapText(this.ctx,text,110,230,width -5,15);
       var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purpases only.";
-      this.ctx.font = "12x PixelType";
+      this.ctx.font = "18px PixelType";
       wrapText(this.ctx,text,110,height+50,width -5,15);
     this.ctx.restore();
 };
