@@ -1,7 +1,7 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 64;
-const MAPROWS = 144;
+const MAPCOLS = 84;
+const MAPROWS = 200;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
 
@@ -70,6 +70,8 @@ var Keyboard = {};
 
 Keyboard.Q = 81;
 Keyboard.ESC = 27;
+Keyboard.Y = 89;
+Keyboard.N = 78;
 
 Keyboard._keys = {};
 
@@ -177,6 +179,8 @@ Mouse.handleUp = function(e){
 }
 
 Mouse.handleMove =  function(e){
+  Mouse.currentX = e.offsetX;
+  Mouse.currentY = e.offsetY;
   if(Mouse.down === true && Mouse.click.x != -1){
     Mouse.click.arrived = false;
     Game.hero.walking = true;
@@ -188,8 +192,12 @@ Mouse.handleMove =  function(e){
 };
 
 Mouse.currentDest = function (){
+  if(Mouse.down == true){
+    Mouse.click.x = Mouse.currentX + Game.camera.x;
+    Mouse.click.y = Mouse.currentY + Game.camera.y;
+  }
 //    console.log(this.click.arrived);
-    if(Mouse.click.arrived === false){
+    if(Mouse.down || Mouse.click.arrived === false){
       return true;
     }else return false;
   };

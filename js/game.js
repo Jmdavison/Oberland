@@ -101,9 +101,18 @@ function Hero(heroNum,map, x, y, inv) {
       }
       return -1;
     }
+
+    this.checkQuestReadiness = function(index, numRequired){
+      for(var i = 0; i < this.inventory.length; i++){
+        if(this.inventory[i].index == index && this.inventory[i].numberOwned >= numRequired){
+          return true;
+        }
+      }
+      return false;
+    }
 }
 
-Hero.SPEED = 220; // pixels per second
+Hero.SPEED = 256; // pixels per second
 
 Hero.prototype.move = function (delta, destX, destY) {
     // move hero
@@ -406,7 +415,7 @@ Game.init = function (save) {
     this.friendInteraction = null;
     this.selectedItem = null;
     this.uiStream = [];
-    Keyboard.listenForEvents([Keyboard.Q,Keyboard.ESC]);
+    Keyboard.listenForEvents([Keyboard.Q,Keyboard.ESC,Keyboard.Y,Keyboard.N]);
     this.map = new Map();
     if(save){
       this.itemsDown = save.itemsDown;
@@ -440,7 +449,7 @@ Game.update = function (delta) {
       this.saved = true;
     }else if(Math.floor(this.gameTime % 11) === 0 && this.saved == true){
       this.saved =false;
-    }
+    }else if(Math.floor(this.gameTime % 30) === 0){changeColors(canvas);}
     //if key is held display appropriate info
     if(Keyboard.isDown(Keyboard.Q)){this.displayBackpack = true;console.log("down");}
     else if (Keyboard.isDown(Keyboard.ESC)){this.displayGameInfo = true;}
@@ -455,6 +464,17 @@ Game.update = function (delta) {
         Game.launchInteraction();
     }
     this.camera.update();
+};
+
+Game._displayFriendUnlockedCelebration = function(friend,timeStart){
+  var since = this.gameTime - timeStart;
+  this.ctx.save();
+  this.ctx.font = '38px PixelType';
+  this.ctx.fillStyle = "white";
+  this.ctx.textAlign = "center";
+  this.ctx.textBaseline = "middle";
+  this.ctx.fillText(friend.name + " UNLOCKED!",CANVASWIDTH/2,CANVASHEIGHT/2);
+  this.ctx.restore();
 };
 
 Game._displayGameInfo = function(){
@@ -579,6 +599,8 @@ Game._displayBackpack = function(){
         width - itemWidth*2,
         15
       );
+      this.ctx.font = "40px PixelType";
+      this.ctx.fillText("x "+this.selectedItem.numberOwned,width + 55,height+70);
     }
     this.ctx.restore();
 };
@@ -586,11 +608,24 @@ Game._displayBackpack = function(){
 Game._displayFriendInteraction = function(){
   if(this.friendInteraction != null){
     var since = this.gameTime - this.friendInteraction[1];
-    var friend = this.friendInteraction[0]
+    var friend = this.friendInteraction[0];
+    var item = this.map.getItem(friend.quest.index);
     this.ctx.save();
+    if(this.hero.checkQuestReadiness(friend.quest.index,friend.quest.numRequired) == true && (friend.persuaded == false)){
+      friend.currentConvo = 1;
+      this.ctx.strokeStyle = "yellow";
+      if(Keyboard.isDown(Keyboard.Y)){
+        console.log("accepted!");
+        friend.persuaded = true;
+        friend.currentConvo = 2;
+        this.recentUnlock = {friend: friend,
+                              time: this.gameTime};
+        //this.hero.removeItemFromInv();
+        this._displayFriendUnlockedCelebration(friend,this.gameTime);
+      }
+    }else{this.ctx.strokeStyle = "#1C1200";}
       this.ctx.fillStyle = "#BDA26E";
       this.ctx.fillRect(friend.x-100,friend.y-(friend.sourceHeight*1.4), 200, 50);
-      this.ctx.strokeStyle = "#1C1200";
       this.ctx.lineWidth = 2;
       this.ctx.strokeRect(friend.x-100,friend.y-(friend.sourceHeight*1.4), 200 , 50);
       this.ctx.fillStyle = "#1C1200";
@@ -796,6 +831,12 @@ Game.render = function () {
       this._displayGameInfo();
     }else if(this.displayBackpack === true) {
       this._displayBackpack();
+      }
+    if(this.recentUnlock){
+      var since = this.gameTime - this.recentUnlock.time;
+      if(since < 3){
+        this._displayFriendUnlockedCelebration(this.recentUnlock.friend);
+      }else{this.recentUnlock = null;}
     }
 };
 

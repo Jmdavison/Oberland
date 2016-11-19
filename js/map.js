@@ -270,15 +270,16 @@ function Map() {
               image: null,
               currentConvo: 0,
               quest: null,
-              convo: ["Hello there, I'm here to help! \n Bring me !num !questItems \n and I'll make it worth your while.",
-                      "Ahh, I see you have the !questItems, Would you like me to join your team?",
-                      "Good choice peasant, I will be waiting inside."],
+              convo: ["Hi! \n Bring me !num !questItems \n and I'll join your squad!",
+                      "Yyou have the !questItems, I'll joing you if I can have them? (y/n)",
+                      "Haha, Yes! I'm ready to do some damage!"],
               sourceWidth: 34,
               sourceHeight: 63,
               spriteX: 14,
               spriteY: 12,
               frameIndexes: [0,50,103,160,222,280],
               alreadyPlaced: false,
+              persuaded:false,
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
               row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
@@ -290,8 +291,8 @@ function Map() {
               image: null,
               quest: null,
               convo: ["Hello there, I'm here to help! \n Bring me !num !questItems \n and I'll make it worth your while.",
-                      "Ahh, I see you have the !questItems, \n Would you like me to join your team?",
-                      "Good choice peasant, I will be waiting inside."],
+                      "Ahh, I see you have the !questItems, \n Would you like me to join your team? (y/n)",
+                      "Good choice dude!, I will see you on the flip side."],
               sourceWidth: 35,
               sourceHeight: 63,
               spriteX: 10,
@@ -300,7 +301,7 @@ function Map() {
               persuaded: false,
               frameIndexes: [0,65,155,250],
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
+              col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
               row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     frieza: {
@@ -310,7 +311,7 @@ function Map() {
               image: null,
               quest: null,
               convo: ["Hello peasant, I am FRIEZA. Bring me !num !questItems and I will defend the little shack you call home.",
-                      "Ahh, I see you have the !questItems, Would you like me to join your team?",
+                      "Ahh, I see you have the !questItems, Would you like me to join your team? (y/n)",
                       "Good choice peasant, I will be waiting inside."],
               sourceWidth: 48,
               sourceHeight: 67,
@@ -320,7 +321,7 @@ function Map() {
               imgLoaded: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
+              col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
               row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     piccolo: {
@@ -330,8 +331,8 @@ function Map() {
               image: null,
               quest: null,
               convo: ["Hello traveler, I am piccolo. \n Bring me !num !questItems and I will keep \n you safe from your\n enemies.",
-                      "Ahh, I see you have the !questItems, \n  Would you like me to join your team?",
-                      "Good choice peasant, I will be waiting inside."],
+                      "Ahh, I see you have the !questItems, \n  Would you like me to join your team? (y/n)",
+                      "Indeed my friend! I will be waiting inside."],
               sourceWidth: 51,
               sourceHeight: 71,
               spriteY:58,
@@ -339,7 +340,7 @@ function Map() {
               alreadyPlaced: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
+              col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
               row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             },
     link: {
@@ -349,8 +350,8 @@ function Map() {
               image: null,
               quest: null,
               convo: ["I'll fire my arrows by your will. Just bring me !num !questItems",
-                      "Ahh, I see you have the !questItems, \n  Would you like me to join your team?",
-                      "Good choice peasant, I will be waiting inside."],
+                      "Ahh, I see you have the !questItems, \n  Would you like me to join your team? (y/n)",
+                      "Thank you, I will be waiting inside."],
               sourceWidth: 36,
               sourceHeight: 60,
               spriteY:0,
@@ -358,7 +359,7 @@ function Map() {
               alreadyPlaced: false,
               persuaded: false,
               damage: [10,20,50,100],
-              col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
+              col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
               row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
             }
   };
@@ -434,16 +435,25 @@ function Map() {
     var rand = Math.floor(Math.random()*map.availableQuests.length);
     //console.log(rand);
     var quest = map.availableQuests[rand];
-    map.availableQuests.splice(rand,1);
-    return quest;
+    if(quest.numRequired == 0){
+      map.availableQuests.splice(rand,1);
+      this.getQuest();
+    }else{
+      map.availableQuests.splice(rand,1);
+      return quest;
+    }
   };
   this.loadQuests = function(map){
     for (var x in map.items){
     //  console.log("push");
-      map.availableQuests.push({
-        itemName: map.items[x].name,
-        numRequired: map.items[x].numPlaced - Math.floor(map.items[x].numPlaced/4)
-      });
+      var num = Math.floor(map.items[x].numPlaced/4)
+      if(map.items[x].numPlaced > 0){
+        map.availableQuests.push({
+          itemName: map.items[x].name,
+          numRequired: map.items[x].numPlaced - num,
+          index: map.items[x].index
+        });
+      }
     }
     for(var x in map.friends){
       map.friends[x].quest = map.getQuest(map);
