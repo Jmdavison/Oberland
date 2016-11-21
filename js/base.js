@@ -1,7 +1,7 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 84;
-const MAPROWS = 200;
+const MAPCOLS = 48;
+const MAPROWS = 48;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
 
@@ -28,7 +28,12 @@ var FRIENDS = {
                PINK_RANGER: 104,
                LINK: 105
              };
-
+var SOUNDS = {
+              STEP1: "./sounds/step1.ogg",
+              STEP2: "./sounds/step2.wav",
+              ITEM_PICKUP: "./sounds/itemPickup.wav",
+              FRIEND_UNLOCK:"./sounds/friendUnlock.wav"
+            };
 //background objects
 const TREE = 2;
 const BURNT_TREE = 5;
@@ -40,7 +45,9 @@ const GRASS = 1;
 // Asset loader
 //
 var Loader = {
-    images: {}
+    images: {},
+    sounds: {},
+    done: 0
 };
 //this asset load loads images the async Promise function and stores them
 //in the images object.
@@ -61,6 +68,39 @@ Loader.loadImage = function (key, src) {
     img.src = src;
     return d;
 };
+
+Loader.loadSound = function(key, src){
+  var audio = new Audio();
+  var p = new Promise(function(resolve,reject){
+        audio.onloadedmetadata = function(){
+            console.log("done");
+            this.sounds[key] = audio;
+            resolve(audio);
+        }.bind(this);
+        audio.onerror = function(e) {
+          switch (e.target.error.code) {
+            case e.target.error.MEDIA_ERR_ABORTED:
+              alert('You aborted the video playback.');
+              break;
+            case e.target.error.MEDIA_ERR_NETWORK:
+              alert('A network error caused the audio download to fail.');
+              break;
+            case e.target.error.MEDIA_ERR_DECODE:
+              alert('The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.');
+              break;
+            case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              alert('The video audio not be loaded, either because the server or network failed or because the format is not supported.');
+              break;
+            default:
+              alert('An unknown error occurred.');
+              break;
+          }
+        };
+    }.bind(this));
+    audio.src = src;
+    audio.load();
+    return p;
+  };
 
 Loader.getImage = function (key) {
     return (key in this.images) ? this.images[key] : null;

@@ -19,6 +19,15 @@ html,body,ul,li,h1,h2,h3,h4,p{margin:0; padding:0;}
 .controls{top:18px;height:15px;visibility:hidden;line-height:1;font-size:1.2em;}
 body,.wrapper,canvas,.loading,.controls,.welcome{font-family: 'PixelType';}
 body,canvas{transition: background-color 2s ease;}
+canvas{
+      -webkit-user-select: none;  /* Chrome all / Safari all */
+      -moz-user-select: none;     /* Firefox all */
+      -ms-user-select: none;      /* IE 10+ */
+      -o-user-select: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+}
 body.day{background-color:#8cc6ef;}
 canvas.day{background-color:#97e470;width:512px; height:512px; }
 body.night{background-color:#241b2f;}

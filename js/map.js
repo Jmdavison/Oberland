@@ -211,16 +211,6 @@ function Map() {
       numberOwned:0,
       col: Math.floor(Math.random() * 26) + 2
     },
-    bigPill: {
-      index: ITEMS.bigPill,
-      name: "big pill",
-      comment: "that'll hurt to swallow",
-      spriteIndex:145,
-      rarity:3,
-      numPlaced:0,
-      numberOwned:0,
-      col: Math.floor(Math.random() * 26) + 2
-    },
     slimyDrink: {
       index: ITEMS.slimyDrink,
       name: "slimy drink",

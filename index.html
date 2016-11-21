@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="description" content="A game made for COSC 231 at Eastern Michigan University">
-    <title>nuGame</title>
+    <title>Oberland</title>
     <link rel="stylesheet" href="css/main.css" media="screen">
     <script type="application/javascript" src="js/base.js" defer></script>
     <script type="application/javascript" src="js/map.js" defer></script>
@@ -12,14 +12,14 @@
     </script>
   </head>
   <body class="night">
-    <div id="wrapper" style="font-family:'Indie Flower', cursive;">
+    <div id="wrapper">
       <img class="loading" src="images/squares.svg" alt="Loading..."/>
-      <p class="welcome">Everybody that lives in Oberland loves Oberland.</p>
+      <p class="welcome">Welcome to Oberland.</p>
       <div class="controls">
-        <p>Click around</p>
+        <p>Click/Hold to move around</p>
         <p>[Press ESC for game info]  --  [Press Q for Inventory]</p>
       </div>
-      <canvas id="canvas" class="shadow night">
+      <canvas id="canvas" class="shadow night" oncontextmenu="return false;">
       </canvas>
     </div>
   </body>

@@ -4,7 +4,7 @@ tilemap scrolling example from mdn.
 */
 
 
-//
+//s
 // Camera Constructor
 //
 
@@ -386,7 +386,11 @@ Game.loadFriends = function() {
 
 //calls async loading of image assets (resolves on load)
 Game.load = function () {
-    return [
+     return [
+        // Loader.loadSound('step1', SOUNDS.STEP1),
+        // Loader.loadSound('step2', SOUNDS.STEP2),
+        // Loader.loadSound('itemPickup', SOUNDS.ITEM_PICKUP),
+        // Loader.loadSound('friendUnlock', SOUNDS.FRIEND_UNLOCK),
         document.fonts.load("18px PixelType"),
         Loader.loadImage('startbg', './images/bgimg.png'),
         Loader.loadImage('piccolo', './images/piccolo.png'),
@@ -857,6 +861,7 @@ window.onload = function () {
   canvas.addEventListener("mousemove", Mouse.handleMove);
   canvas.width = CANVASWIDTH;
   canvas.height = CANVASHEIGHT;
+  Game.sounds = [];
   var context = canvas.getContext('2d');
   if(gameLoaded != null){
     Game.save = JSON.parse(gameLoaded);
