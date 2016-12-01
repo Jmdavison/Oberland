@@ -13,8 +13,8 @@ Go out into the night, gather items and see if you can unlock all of the charact
 *This game is conceptually unfinished, but has satisfied the requirements for the class 
 project. I may continue development at some point. But as of now the game stands as an 
 example of my first from scratch HTML5 Canvas game, and has served it's purpose for me 
-educationally.
+educationally.*
 
-Thanks guys,
+*Thanks,*
 
--J*
+*-J*
