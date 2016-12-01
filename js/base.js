@@ -1,7 +1,7 @@
 const CANVASWIDTH = 512;
 const CANVASHEIGHT = 512;
-const MAPCOLS = 48;
-const MAPROWS = 48;
+const MAPCOLS = 64;
+const MAPROWS = 750;
 const NUMLAYERS = 3;
 const TILESIZE = 32;
 
@@ -110,6 +110,7 @@ var Keyboard = {};
 
 Keyboard.Q = 81;
 Keyboard.ESC = 27;
+Keyboard.W = 87;
 Keyboard.Y = 89;
 Keyboard.N = 78;
 

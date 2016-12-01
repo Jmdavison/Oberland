@@ -416,10 +416,11 @@ Game.init = function (save) {
     this.controls.style.visibility = 'initial';
     this.displayBackpack = false;
     this.displayGameInfo = false;
+    this.displayQuestInfo = false;
     this.friendInteraction = null;
     this.selectedItem = null;
     this.uiStream = [];
-    Keyboard.listenForEvents([Keyboard.Q,Keyboard.ESC,Keyboard.Y,Keyboard.N]);
+    Keyboard.listenForEvents([Keyboard.Q,Keyboard.W,Keyboard.ESC,Keyboard.Y,Keyboard.N]);
     this.map = new Map();
     if(save){
       this.itemsDown = save.itemsDown;
@@ -449,15 +450,19 @@ Game.update = function (delta) {
     //if 30 seconds have passed, save the game
     if((Math.floor(this.gameTime % 11) === 10 ) && this.saved == false){
       this.saveGame();
-      console.log('save');
       this.saved = true;
     }else if(Math.floor(this.gameTime % 11) === 0 && this.saved == true){
       this.saved =false;
     }else if(Math.floor(this.gameTime % 30) === 0){changeColors(canvas);}
     //if key is held display appropriate info
-    if(Keyboard.isDown(Keyboard.Q)){this.displayBackpack = true;console.log("down");}
+    if(Keyboard.isDown(Keyboard.Q)){this.displayBackpack = true;}
     else if (Keyboard.isDown(Keyboard.ESC)){this.displayGameInfo = true;}
-    else {this.displayBackpack = false; this.displayGameInfo = false;}
+    else if(Keyboard.isDown(Keyboard.W)){this.displayQuestInfo = true;}
+    else {
+      this.displayBackpack = false;
+      this.displayGameInfo = false;
+      this.displayQuestInfo = false;
+    }
     //checks the click object for a new click and moves the character if so.
     if(Mouse.currentDest()){
       this.hero.move(delta, Mouse.click.x,Mouse.click.y);
@@ -493,16 +498,52 @@ Game._displayGameInfo = function(){
       this.ctx.strokeRect(100,100,width,height);
       this.ctx.fillStyle="#16150e";
       this.ctx.font="22px PixelType";
-      var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood. Just like you always do. \n\n Collect items and bring them to those who you know best. then when you're ready, return home for the night.";
+      var text = "Welcome to Oberland, Wisconsin. Where you've found yourself alone, wonderring your small suburban neighborhood -- Just like you always do. Collect items and bring them to those who you know best.";
        wrapText(this.ctx,text,110,125,width-5,15);
       // var text = "During the day, you will find need to defend your house from the endless waves of normies. Position the friends that you've unlocked and theyll attack each visitor that approaches.";
       //wrapText(this.ctx,text,110,230,width -5,15);
-      var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purpases only.";
+      var text = "Created by Jacob Davison, for COSC 231 at Eastern Michigan University. Educational purposes only.";
       this.ctx.font = "18px PixelType";
       wrapText(this.ctx,text,110,height+50,width -5,15);
     this.ctx.restore();
 };
-
+Game._displayQuestInfo = function(){
+    var height  = CANVASHEIGHT-200;
+    var width   = CANVASWIDTH -200;
+    this.ctx.save();
+      this.ctx.fillStyle = "#d1c27f";
+      this.ctx.fillRect(100,100,width,height);
+      this.ctx.strokeStyle = "#16150e";
+      this.ctx.lineWidth = 5;
+      this.ctx.strokeRect(100,100,width,height);
+      this.ctx.fillStyle="#16150e";
+      this.ctx.font="48px PixelType";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+      var text = "Quest Log";
+      wrapText(this.ctx,text,CANVASWIDTH/2,125,width-5,15);
+      this.ctx.font="36px PixelType";
+      var count = 0;
+      for(x in this.map.friends){
+        text = x;
+        if(this.map.friends[x].persuaded === true){
+          this.ctx.fillStyle="green";
+          wrapText(this.ctx,text,CANVASWIDTH/2,155+(30*count),width-5,15);
+        }else{
+          this.ctx.save();
+          this.ctx.fillStyle="#474d56";
+          wrapText(this.ctx,text,CANVASWIDTH/2,155+(50*count),width-5,15);
+          this.ctx.font = '24px PixelType';
+          var item = this.map.getItem(this.map.friends[x].quest.index);
+          var needed  = this.map.friends[x].quest.numRequired - item.numberOwned;
+          text = this.map.friends[x].quest.itemName + " -- " + needed + " needed";
+          wrapText(this.ctx,text,CANVASWIDTH/2,175+(50*count),width-5,15);
+          this.ctx.restore();
+        }
+        count++;
+      }
+    this.ctx.restore();
+};
 Game._displayBackpack = function(){
     var height  = CANVASHEIGHT-200;
     var width   = CANVASWIDTH -200;
@@ -619,7 +660,6 @@ Game._displayFriendInteraction = function(){
       friend.currentConvo = 1;
       this.ctx.strokeStyle = "yellow";
       if(Keyboard.isDown(Keyboard.Y)){
-        console.log("accepted!");
         friend.persuaded = true;
         friend.currentConvo = 2;
         this.recentUnlock = {friend: friend,
@@ -835,7 +875,9 @@ Game.render = function () {
       this._displayGameInfo();
     }else if(this.displayBackpack === true) {
       this._displayBackpack();
-      }
+    }else if(this.displayQuestInfo === true){
+      this._displayQuestInfo();
+    }
     if(this.recentUnlock){
       var since = this.gameTime - this.recentUnlock.time;
       if(since < 3){

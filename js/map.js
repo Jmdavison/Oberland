@@ -123,20 +123,21 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
     }
   }
 
-  // PRINT LAYERS ARRAY FOR DEBUGGING PURPOSES
-  var string = "";
-  for(var i = 0; i < layers.length; i++){
-    string += '\n \n';
-    for(var j = 0; j < rows; j++){
-      string += '\n';
-      for(var k = 0; k < cols; k++){
-        string += layers[i][j * cols + k];
-      }
-    }
-  }
- console.log(string);
-  return layers;
-}
+// PRINT LAYERS ARRAY FOR DEBUGGING PURPOSES
+//   var string = "";
+//   for(var i = 0; i < layers.length; i++){
+//     string += '\n \n';
+//     for(var j = 0; j < rows; j++){
+//       string += '\n';
+//       for(var k = 0; k < cols; k++){
+//         string += layers[i][j * cols + k];
+//       }
+//     }
+//   }
+//  console.log(string);
+
+   return layers;
+ }
 
 //
 // Map Constructor
@@ -252,7 +253,7 @@ function Map() {
       col: Math.floor(Math.random() * 26) + 2
     },
   };
-
+// R = Rand*(max - min + 1) + min
   this.friends = {
     pinkRanger: {
               index: FRIENDS.PINK_RANGER,
@@ -272,7 +273,7 @@ function Map() {
               persuaded:false,
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-4)) + 4),
-              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
+              row: (Math.floor(Math.random() * (MAPROWS - 700 + 1) + 700))
             },
     blueRanger: {
               index:FRIENDS.BLUE_RANGER,
@@ -292,7 +293,7 @@ function Map() {
               frameIndexes: [0,65,155,250],
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
-              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
+              row: (Math.floor(Math.random() * (MAPROWS - 700 + 1) + 700))
             },
     frieza: {
               index:FRIENDS.FRIEZA,
@@ -312,7 +313,7 @@ function Map() {
               persuaded: false,
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
-              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
+              row: (Math.floor(Math.random() * (MAPROWS - 700 + 1) + 700))
             },
     piccolo: {
               index:FRIENDS.PICCOLO,
@@ -331,7 +332,7 @@ function Map() {
               persuaded: false,
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
-              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
+              row: (Math.floor(Math.random() * (MAPROWS - 700 + 1) + 700))
             },
     link: {
               index:FRIENDS.LINK,
@@ -350,7 +351,7 @@ function Map() {
               persuaded: false,
               damage: [10,20,50,100],
               col: (Math.floor(Math.random() * (MAPCOLS-8)) + 4),
-              row: (Math.floor(Math.random() * (MAPROWS - 1)) + 10)
+              row: (Math.floor(Math.random() * (MAPROWS - 700 + 1) + 700))
             }
   };
   this.interaction = 0;
@@ -388,12 +389,10 @@ function Map() {
     return row * this.tSize;
   };
   this.isInteraction = function(x,y){
-    //takes x,y coordinates from the mouse function and checks if the tile is clickable
       var col = this.getCol(y);
       var row = this.getRow(x);
 
       if(this.getTile(1,col, row) > 1000){
-        console.log("on top of item!!");
         Game.currentInteraction = this.getTile(1,col,row);
         this.clearTile(1, col, row);
         return true;
