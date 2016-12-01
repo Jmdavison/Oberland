@@ -1,19 +1,20 @@
+#Oberland
 
 This project is made by Jacob Davison for COSC 231: Internet Based Computing at Eastern Michigan University
 
-------------------------
+###[Play Here](http://stump.one/Oberland)
+___________________________________________________________________________
 
 You are a typical suburban 90's kid who has turned to the iconic figures of
 your childhood to help cope with the pressures of adult life in the 21st century.
 
-Go out into the night, gather items and recruit your friends in order to help
-defend your home from the endless waves of solicitors, debt collectors,
-annoying colleagues, and more that come during the day.
+Go out into the night, gather items and see if you can unlock all of the characters!
 
-The game fuses two traditional game genres into one, Survival adventure and Tower Defense.
+*This game is conceptually unfinished, but has satisfied the requirements for the class 
+project. I may continue development at some point. But as of now the game stands as an 
+example of my first from scratch HTML5 Canvas game, and has served it's purpose for me 
+educationally.*
 
-The graphics are reminiscent to early 90's portable games such as pokemon, legend of zelda
-fire emblem, etc.
+Thanks guys,
 
-click around the map to smove your character, collect the various objects needed to persuade the characters from your past to join your team, and defend
-you from the evils that come during the day
+Jake.
