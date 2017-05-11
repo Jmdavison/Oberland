@@ -5,7 +5,7 @@ This project is made by Jacob Davison for COSC 231: Internet Based Computing at 
 ### [Play Here](http://stump.one/Oberland)
 ___________________________________________________________________________
 
-##This project was made for educational purposes only.
+## This project was made for educational purposes only.
 
 ### Go out into the night, gather items and see if you can unlock all of the characters!
 
