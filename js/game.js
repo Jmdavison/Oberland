@@ -4,7 +4,7 @@ tilemap scrolling example from mdn.
 */
 
 
-//s
+//
 // Camera Constructor
 //
 
