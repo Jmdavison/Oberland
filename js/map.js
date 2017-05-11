@@ -1,7 +1,7 @@
 
- //These random color generators follow the formula below
+//These random color generators follow the formula below
 // R = Rand*(max - min + 1) + min
-//in order to receive a specified range of numbers
+//in order to retrieve a specified range of colors
 function getRandomBgColor() {
     var r = Math.floor((Math.random() * (80-20+1))+20);
     var g = Math.floor((Math.random() * (70-30+1))+30);
@@ -21,6 +21,7 @@ function changeColors(canvas){
   document.body.style.backgroundColor = getRandomBgColor();
   canvas.style.backgroundColor = getRandomFgColor();
 }
+
 //a function that wraps text inside a width at a specified location
 //gotten from stackoverflow.com
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
@@ -43,9 +44,8 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
   context.fillText(line, x, y);
 }
 
-
 //really nice little snippet gotten from Stackoverflow
-//grabs a random property of an oject
+//that grabs a random property of an oject
 function pickRandomProperty(obj) {
     var result;
     var count = 0;
@@ -55,9 +55,13 @@ function pickRandomProperty(obj) {
     return result;
 }
 
-//
-// Map Generator Function
-//
+/*
+Map Generator Function:
+    This function creates our tileset array, it builds the different layers
+    of the game map. First building the landscape, and moving on to objects and
+    Characters.
+ */
+
 var generateMap = function (rows, cols, numLayers, friends, items) {
   var layers = new Array();
   for (var i = 0; i < numLayers; i++){
@@ -75,7 +79,7 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
               //drop drop friends randomly
             else {layers[i][j*cols + k] = GRASS;}
             break;
-          //generate objects and friends layer
+          //generate Second (objects and friends) layer
           case 1:
             if(j < rows - 10){
               var found=null;
@@ -140,9 +144,14 @@ var generateMap = function (rows, cols, numLayers, friends, items) {
  }
 
 //
-// Map Constructor
+// Map Constructor:
+// This is where we will declare our map objects
 //
-
+// forumla for random row and column assignment is:
+// R = Rand*(max - min + 1) + min
+// This gives us a range of min-max
+// TODO: make this a simple function to limit the
+//       redundant declarations below.
 function Map() {
 
   this.cols = MAPCOLS;
@@ -253,7 +262,6 @@ function Map() {
       col: Math.floor(Math.random() * 26) + 2
     },
   };
-// R = Rand*(max - min + 1) + min
   this.friends = {
     pinkRanger: {
               index: FRIENDS.PINK_RANGER,
@@ -388,6 +396,9 @@ function Map() {
   this.getY = function (row) {
     return row * this.tSize;
   };
+
+  //this function checks each tile around the character to check for
+  //items or player interactions
   this.isInteraction = function(x,y){
       var col = this.getCol(y);
       var row = this.getRow(x);
@@ -419,6 +430,9 @@ function Map() {
           return false;
         }
       };
+
+  
+  //this fuctions gets a random quest
   this.availableQuests = [];
   this.getQuest = function(map){
     var rand = Math.floor(Math.random()*map.availableQuests.length);
@@ -432,6 +446,8 @@ function Map() {
       return quest;
     }
   };
+
+  //this function loads an array of quests
   this.loadQuests = function(map){
     for (var x in map.items){
     //  console.log("push");
@@ -444,6 +460,8 @@ function Map() {
         });
       }
     }
+
+    //update player dialogue to match random quest assignments
     for(var x in map.friends){
       map.friends[x].quest = map.getQuest(map);
     //  console.log(map.friends[x]);
